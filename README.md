@@ -2,25 +2,25 @@
 Utilities to create bootable disks, remaster ISO images, make multiboot disk images
 
 ## Goals - who needs this?
-### Use case 1 Multiboot disk image
+### Use case 1: Multiboot disk image
 - You want to put one or more ISO images on a single disk and be able to choose which ISO to boot
 - You want to be able to boot on UEFI as well as non-UEFI systems
 - You want to boot on newer Cherry Trail or Bay Trail (Intel Atom) machines that often have a 32-bit EFI loader, while typical Linux ISO images only support UEFI in 64-bit images
 - You want to boot a 64-bit Linux ISO on machines having only a 32-bit EFI loader
 - You do not want to have to edit grub.cfg by hand after adding ISO images
 
-### Remastering ISO
+### Use case 2: Remastering ISO
 - You want to add a custom kernel to an ISO to enable support for newer hardware while in the live session
 - You want the custom kernel to be automatically installed while installing from the live ISO
 - You want to install additional packages that are available in the live session **AND** carried into the installed image
 - You want to add additional files - e.g. utilities, scripts, data files - that are available in the live session **AND** carried into the installed image
 - You want to make a UEFI-compatible 64-bit Linux ISO image bootable on a machine with a 32-bit EFI loader
 
-### Create boot disk on separate disk
+### Use case 3: Create boot disk on separate disk
 - You have a disk that is seen and usable under Linux, but is not seen by the BIOS / UEFI - e.g. newer PCI-Express NVME M.2 disks
 - You need a boot image that can contain ONLY /boot, which will then boot from the other disk that the BIOS / UEFI cannot see
 
-### Fix grub-install errors
+### Use case 4: Fix grub-install errors
 - Linux installer fails after grub-install step - usually bug in installer
 - You want to recover and continue
 
