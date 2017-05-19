@@ -9,7 +9,7 @@
 -  Execute iso_post scripts within extracted ISO (not chroot-ede)
 -  Recreate modified ISO
 
-## Script plugn model
+## Script plugin model
 At each of the following stages, one or more scripts can be run
 
 - iso_pre: **after** ISO extract, **before** extracting from squashfs
