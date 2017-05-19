@@ -153,6 +153,7 @@ function run_remaster_commands {
     REMASTER_STAGE=${ISO_PRE_CMD_DIR}
     local local_src_dir=${local_remaster_cmds_dir}/${REMASTER_STAGE}
     if [ -d $local_src_dir ]; then
+        sudo mkdir -p  $local_iso_dir/${TMP_REMASTER_DIR}
         sudo \cp -af ${local_src_dir} $local_iso_dir/${TMP_REMASTER_DIR}
         \cp -f ${PROG_DIR}/__remaster_toplevel.sh $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD}
         REMASTER_STAGE=$REMASTER_STAGE $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD} 2>&1 | tee -a $local_remaster_log
@@ -193,6 +194,7 @@ function run_remaster_commands {
     fi
     local_src_dir=${local_remaster_cmds_dir}/${REMASTER_STAGE}
     if [ -d $local_src_dir ]; then
+        sudo mkdir -p  $local_iso_dir/${TMP_REMASTER_DIR}
         sudo \cp -af ${local_src_dir}/. $local_iso_dir/${TMP_REMASTER_DIR}/.
         \cp -f ${PROG_DIR}/__remaster_toplevel.sh $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD}
         REMASTER_STAGE=$REMASTER_STAGE $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD} 2>&1 | tee -a $local_remaster_log
