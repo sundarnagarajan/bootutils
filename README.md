@@ -84,4 +84,4 @@ On Ubuntu (or other Debian-derived distributions, probably), you can run ```requ
 
 ## Help on individual utilities
 
-[multiboot_create.py] (docs_md.multiboot_create.md)
+[multiboot_create.py](docs_md.multiboot_create.md)
