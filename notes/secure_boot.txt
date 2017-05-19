@@ -1,0 +1,207 @@
+
+Packages:
+    sbsigntool : Was already installed on Ubuntu Mate 16.04
+    Includes:
+        sbvarsign
+        sbkeysync
+        sbattach
+        sbverify
+        sbsign
+        sbsiglist
+        kmodsign
+
+    efitools :   Depends on sbsigntool
+    Includes:
+        sig-list-to-certs
+        cert-to-efi-sig-list
+        hash-to-efi-sig-list
+        efi-readvar
+        efi-updatevar
+        efitool-mkusb
+        sign-efi-sig-list
+
+    efibootmgr 
+
+    fwupd : Firmware update daemon
+
+    fwupdate - Tools to manage UEFI firmware updates
+
+    fwupdate-signed - Linux Firmware Updater EFI signed binary
+
+    shim - boot loader to chain-load signed boot loaders under Secure Boot
+
+    shim-signed - Secure Boot chain-loading bootloader (Microsoft-signed binary)
+
+    gummiboot - Simple UEFI bootloader
+
+    pesign - Signing utility for UEFI binaries
+
+    syslinux-efi - collection of bootloaders (UEFI bootloader)
+
+    ovmf - UEFI firmware for virtual machines
+
+    qemu-efi - UEFI firmware for virtual machines
+
+
+Concerns and potential issues in taking control of Secure Boot keys
+-------------------------------------------------------------------
+
+Meaning: 'Taking control' refers to ALL the following steps:
+
+    - Disable / remove existing secure boot keys (typically Microsoft-signed)
+    - Add your own signing keys to the firmware
+    - Enable SecureBoot
+    - Sign your EFI applications with your own key - REQUIRED
+        if you perform remaining steps
+
+
+Concerns and potential issues:
+
+Lack of support for option ROMs
+
+    Some plug-in cards have firmware that's signed by Microsoft's keys. Such a card
+    will not work (at least, not from the firmware) if you enable Secure Boot
+    without the matching public key. (The card should still work once you've booted
+    an OS. The biggest concern is for cards that must work in a pre-boot
+    environment, such as a video card or for PXE-booting a network card.) 
+
+    This can also affect RAID cards, SAS cards etc
+
+
+Broken Secure Boot authentication
+
+    Some of my Secure Boot computers reject a significant fraction of EFI programs
+    that are signed as described on this page. Other computers accept the same
+    binaries just fine, and they work fine on the affected machines when launched
+    via Shim, so it appears that either some computers' Secure Boot implementations
+    are overly strict or there's a subtle problem in the way the binaries are signed
+    that affects only some Secure Boot implementations. Binaries built with recent
+    versions of GNU-EFI seem to be particularly prone to these problems.
+
+
+
+Links
+-----
+
+
+ACPI Specification
+    http://www.uefi.org/sites/default/files/resources/ACPI_6_1.pdf
+
+    See page 96 (50) for Battery Management
+    See page 206 (160 sec 5.2.14 for Smart Battery Table (SBST)
+
+Power Management @ArchWiki
+    https://wiki.archlinux.org/index.php/Power_management
+
+SecureBoot by Rod Smith:
+    http://www.rodsbooks.com/efi-bootloaders/controlling-sb.html
+
+UEFI SecureBoot - James Bottomley
+    https://blog.hansenpartnership.com/uefi-secure-boot/
+
+
+
+
+SecureBoot:
+    https://www.happyassassin.net/2014/01/25/uefi-boot-how-does-that-actually-work-then/    
+
+
+
+
+
+Most of the unhappiness about Secure Boot is not really about Secure Boot the 
+mechanism – whether the people expressing that unhappiness think it is or not 
+–
+but about specific implementations of Secure Boot in the real world.
+
+The only one we really care about is Secure Boot as it’s implemented on PCs 
+shipped with Microsoft Windows 8 or higher pre-installed.
+
+Microsoft has these things called the Windows Hardware Certification 
+Requirements. There they are. They are not Top Secret, Eyes Only, You Will Be 
+Fed To Bill Gates Sharks After Reading - they're right there on the Internet 
+for anyone to read.
+
+If you want to get cheap volume licenses of Windows from Microsoft to 
+pre-install on your computers and have a nice 'reassuring' 'Microsoft 
+Approved!' sticker or whatever on the case, you have to comply with these 
+requirements. That's all the force they have: they are not actually a part of 
+the law of the United States or any other country, whatever some people seem to 
+believe. Bill Gates cannot feed you to his sharks if you sell a PC that doesn't 
+comply with these requirements, so long as you don't want a cheap copy of 
+Windows to pre-install and a nice sticker. There is literally no requirement 
+for a PC sold outside the Microsoft licensing program to configure Secure Boot 
+in any particular way, or include Secure Boot at all. A PC that claims to have 
+a UEFI 2.2 or later compliant firmware must implement Secure Boot, but can ship 
+with it configured in literally absolutely any way it pleases (including turned 
+off).
+
+If you're going to have very loud opinions about Secure Boot, you have zero 
+excuse for not going and reading the Microsoft certification requirements. 
+Right now. I'll wait. You can search for 'Secure Boot' to get to the relevant 
+bit. It starts at 'System.Fundamentals.Firmware.UEFISecureBoot'.
+
+You should read it. But here is a summary of what it says.
+
+Computers complying with the requirements must:
+
+- Ship with Secure Boot turned on (except for servers)
+- Have Microsoft's key in the list of keys they trust
+- Disable BIOS compatibility mode when Secure Boot is enabled (actually the
+  UEFI spec requires this too, if I read it correctly)
+- Support signature blacklisting
+
+x86 computers complying with the requirements must additionally:
+
+- Allow a physically present person to disable Secure Boot
+- Allow a physically present person to enable Custom Mode, and modify the list
+  of keys the firmware trusts
+
+ARM computers complying with the requirements must additionally:
+
+- NOT allow a physically present person to disable Secure Boot
+- NOT allow a physically present person to enable Custom Mode, and modify the
+  list of keys the firmware trusts
+
+Yes. You read that correctly. The Microsoft certification requirements, for x86
+machines, explicitly require implementers to give a physically present user
+complete control over Secure Boot - turn it off, or completely control the list
+of keys it trusts. Another important note here is that while the certification
+requirements state that the out-of-the-box list of trusted keys must include
+Microsoft's key, they don't say, for e.g., that it must not include any other
+keys. The requirements explicitly and intentionally allow for the system to ship
+with any number of other trusted keys, too.
+
+These requirements aren't present entirely out of the goodness of Microsoft's
+heart, or anything - they're present in large part because other people
+explained to Microsoft that if they weren't present, it'd have a hell of a
+lawsuit on its hands2 - but they are present. Anyone who actually understands
+UEFI and Secure Boot cannot possibly read the requirements any other way, they
+are extremely clear and unambiguous. They both clearly intend to and succeed in
+ensuring the owner of a certified system has complete control over Secure Boot.
+
+If you have an x86 system that claims to be Windows certified but does not allow
+you to disable Secure Boot, it is in direct violation of the certification
+requirements, and you should certainly complain very loudly to someone. If a lot
+of these systems exist then we clearly have a problem and it might be time for
+that giant lawsuit, but so far I'm not aware of this being the case. All the
+x86-based, Windows-certified systems I've seen have had the 'disable Secure
+Boot' option in their firmwares.
+
+Now, for ARM machines, the requirements are significantly more evil: they state
+exactly the opposite, that it must not be possible to disable Secure Boot and it
+must not be possible for the system owner to change the trusted keys. This is
+bad and wrong. It makes Microsoft-certified ARM systems into a closed shop.  But
+it's worth noting it's no more bad or wrong than most other major ARM platforms.
+Apple locks down the bootloader on all iDevices, and most Android devices al so
+ship with locked bootloaders.
+
+If you're planning to buy a Microsoft-certified ARM device, be aware of this,
+and be aware that you will not be in control of what you can boot on it. If you
+don't like this, don't buy one. But also don't buy an iDevice, or an Android
+device with a locked bootloader (you can buy Android devices with unlocked or
+unlockable bootloaders, still, but you have to do your research).
+
+As far as x86 devices go, though, right now, Microsoft's certification require
+ments actually explicitly protect your right to determine what can boot on your
+system. This is good.

@@ -1,0 +1,114 @@
+Ubuntu - 2x (amd64, i386) for each
+	Download URL: http://mirror.pnl.gov/releases/
+	Grub_config: http://git.marmotte.net/git/glim/tree/grub2/inc-ubuntu.cfg
+
+	Main Ubuntu (Unity)
+	Ubuntu server
+
+	OFFICIAL Ubuntu flavours
+		Kubuntu
+		Lubuntu
+		Ubuntu Gnome
+		Ubuntu Mate
+		Xubuntu
+
+		Ignored: Edubuntu, Mythbuntu, UbuntuKylin, UbuntuStudio
+	
+	Ubuntu derivatives
+		Linuxmint - 2x (amd64, i386) for each
+			Download URL: https://www.linuxmint.com/download.php
+			Grub_config: http://git.marmotte.net/git/glim/tree/grub2/inc-linuxmint.cfg
+			Cinnamon
+			MATE
+			Xfce
+			KDE
+
+			Ignored: LMDE (LinuxMint Debian Edition)
+		
+	GRML - 2x (amd64, i386) for each
+		Download URL: https://grml.org/download/
+		Grub_config: http://git.marmotte.net/git/glim/tree/grub2/inc-grml.cfg
+		About BOOTID: http://ml.grml.org/pipermail/grml/2010-July/010998.html
+		grml-full
+		grml-small
+
+	Knoppix - 2x (amd64, i386) for each
+		Download URL: http://mirrors.sonic.net/knoppix/
+		Grub_config: http://git.marmotte.net/git/glim/tree/grub2/inc-knoppix.cfg
+		CD
+		DVD
+
+	Debian - 2x (amd64, i386) for each
+		Download URL: http://cdimage.debian.org/debian-cd/current/amd64/iso-cd/
+		Grub_config: http://git.marmotte.net/git/glim/tree/grub2/inc-debian.cfg
+		KDE
+		LXDE
+		XFCE
+
+	Arch
+		Download URL: https://mirrors.kernel.org/archlinux/
+		Grub_config: http://git.marmotte.net/git/glim/tree/grub2/inc-arch.cfg
+
+	Fedora
+		Download URL: https://getfedora.org/en/workstation/download/
+		Download URL: https://mirrors.kernel.org/fedora/releases/
+		Grub_config: http://git.marmotte.net/git/glim/tree/grub2/inc-fedora.cfg
+		64-bit Live
+		32-bit Live
+
+	Manjaro (Arch derivative) - 2x (amd64, i386) for each
+		Download URL: https://manjaro.org/get-manjaro/
+		XFCE
+		KDE
+		Gnome
+
+	Antergos (Arch derivative)
+		Download URL: https://www.antergos.com/try-it/
+
+	Sabayon (Gentoo derivative)
+		Download URL: http://www.sabayon.org/download
+
+	Small size distributions
+		PuppyLinux (Debian-derivative)
+			Download URL: http://www.puppylinux.com/download
+
+		TinyCoreLinux (Debian-derivative)
+			Download URL: http://wiki.tinycorelinux.net/wiki:mirrors
+
+	Special Purpose:
+		KaliLinux (Debian-derivative, forensic-focussed)
+			Download URL: http://www.kali.org/downloads/
+
+		TailsOS (Debian-based, privacy-focussed)
+			Download URL: https://tails.boum.org/download/
+
+		BackBox (Ubuntu-based forensic-focussed)
+			Download URL: http://www.backbox.org/downloads
+
+		Parrot Security OS (Debian-based, security-oriented)
+			Download URL: https://www.parrotsec.org/download.fx
+
+	Free-software only distributions
+		Trisquel GNU/Linux (Ubuntu-based)
+			Download URL: http://trisquel.info/download
+
+		gnewsense (Debian-based. sponsored by FSF)
+			Download URL: http://www.gnewsense.org/Mirrors
+
+	Distros without grub recipes
+		OpenSuse
+			Download URL: https://mirrors.kernel.org/opensuse/
+			Tumbleweed
+				amd64
+				x86
+			Stable - amd64 only
+
+		Centos - AMD64 only
+			Download URL: https://mirrors.kernel.org/centos/
+	
+		Gentoo
+			Download URL: https://gentoo.osuosl.org/releases/
+			AMD64
+			x86
+
+

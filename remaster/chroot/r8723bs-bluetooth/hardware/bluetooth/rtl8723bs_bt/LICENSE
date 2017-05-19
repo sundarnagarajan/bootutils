@@ -1,0 +1,9 @@
+The source is from:
+https://github.com/lwfinger/rtl8723bs_bt.git
+
+This source is licensed under the same terms as the original.
+
+If there is no LICENSE specified by the original author, this
+source is hereby licensed under the GNU General Public License version 2.
+
+start_bt.sh has been modified from the original

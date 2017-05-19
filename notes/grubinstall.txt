@@ -1,0 +1,91 @@
+grub packages:
+
+	grub-mkdevicemap: 		from package grub-common
+	grub-mkconfig:    		from package grub-common
+	grub-mkimage:     		from package grub-common
+	grub-mkstandalone 		from package grub-common
+	grub-install:     		from package grub2-common
+
+	/usr/lib/grub/i386-efi          from package grub-efi-ia32-bin
+	/usr/lib/grub/x86_64-efi	from package grub-efi-amd64-bin
+	/usr/lib/grub/i386-pc		from package grub-pc-bin (useless for EFI)
+
+BEFORE doing grub-install:
+
+	sudo apt-get install grub-efi-ia32-bin grub-efi-amd64-bin grub-efi-amd64-signed
+	# NOTE: DO NOT include grub-efi-ia32 - this will cause removal of
+		grub-efi-amd64 grub-efi-amd64-signed
+
+	grub-mkdevicemap     # Creates / updates /boot/grub/device.map
+
+	# Only add kernels from THIS disk
+	chmod -x /etc/grub.d/30_os-prober
+
+	grub-mkconfig -m /boot/grub/grub.cfg
+
+grub-install
+	--target=i386-efi 		# critical - EFI and not PC
+
+	--efi-directory=/boot/efi	# Could be a different mounted dir?
+
+	--bootloader-id=XXX_ubuntu	# optional - defaults to Linux
+
+	/dev/boot/drive			# e.g. /dev/sda
+
+
+grub-install will AUTOMATICALLY add the new boot entry to the bootloader
+
+AFTER grub-install as above:
+
+	mkdir -p /boot/efi/EFI/BOOT
+	cp /boot/efi/EFI/<efi_app_name>/grubia32.efi /boot/efi/EFI/BOOT/bootia32.efi
+
+Without /boot/efi/EFI/BOOT/bootia32.efi, will not appear as boot candidate!
+
+
+Make standalone grub2 EFI images:
+--------------------------------
+    grub-mkstandalone 
+        --format={i386-efi|x86_64-efi}
+        --output=<mnt>/EFI/BOOT/boot{ia32|x64}.efi
+        "/boot/grub.cfg=$CFG"         # CFG is embedded grub config file path
+
+Standalone grub2 EFI images do NOT 'know'  which drive they were invoked from
+Variables  set in such images are ONLY:
+
+    color_highlight=XXXX
+    color_normal=YYYY
+
+    feature_200_final=y
+    feature_chainloader_bpb=y
+    feature_default_font_path=y
+    feature_menuentry_id=y
+    feature_menuentry_options=y
+    feature_nativedisk_cmd=y
+    feature_ntldr=y
+    feature_platform_search_hint=y
+    feature_timeout_style=y
+
+    grub_cpu=x86_64
+    grub_platform=efi
+    lang=
+    locale_dir=
+    pager=
+    prefix=(memdisk/boot/grub
+    root=memdisk
+    secondary_locale_dir=
+
+
+Links:
+-----
+Excellent grub2 shell troubleshooting guide:
+	https://help.ubuntu.com/community/Grub2/Troubleshooting
+
+GRUB2 Manual:
+	https://www.gnu.org/software/grub/manual/grub.html
+
+GRUB2 tutorial by dedoimedo:
+	http://www.dedoimedo.com/computers/grub-2.html
+
+Description of grub2 emulator (package grub-emu):
+    http://blog.fpmurphy.com/2010/06/grub2-modules.html

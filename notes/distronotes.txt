@@ -1,0 +1,220 @@
+1. Identify distro type
+
+2. Based on distro:
+    a. Identify kern_dir (containing kernel, initrd) LIST
+    b. kernel regex
+    c. initrd regex
+    d. Identify squashfs_dir LIST
+    e. squashfs_file regex
+
+    c. Create LIST of ENTRIES. Each ENTRY has following attributes:
+        entry_name
+        variation - short text differentiating entry
+        bit_size - indicates 32-bit or 64-bit if known
+        efi - EFI or Non_EFI if known
+        notes - whether it is known to (not) work etc
+        remaster_info - from /remaster.txt if present
+        kernel_ver
+        kern_dir
+        kern_file
+        initrd_file
+        kern_path
+        initrd_path
+        squashfs_file - can be used to remaster ISO
+        distro_specific --> dict
+            e.g. bootid for GRML
+
+
+Identifying distro from an ISO:
+    Ubuntu:
+        Identified by /ubuntu dir in ISO
+        vmlinuz, initrd under /casper
+        info in /.disk/info
+        Note: Ubuntu server ISOs are NOT live media - cannot be booted
+        Grub_config: http://git.marmotte.net/git/glim/tree/grub2/inc-ubuntu.cfg
+        menu entry:
+            menuentry "Ubuntu 14.04 (LTS) Live Desktop amd64" --class ubuntu {
+              # Variables set from outside
+              set iso_dir="/iso"
+              set isoname="ubuntu-14.04-desktop-amd64.iso"
+              set kernel=vmlinuz.efi or vmlinuz
+
+              echo "Using ${isoname}..."
+
+              set isofile="${iso_dir}/${isoname}"
+              loopback loop $isofile
+              set kern_dir=(loop)/casper
+              set vmlinuz=${kern_dir}/${kernel}
+              set bootargs="boot=casper iso-scan/filename=${isofile}"
+              set distargs=""
+              set extra=""
+              set optargs="quiet splash"
+              linux "${vmlinuz} ${bootargs} ${distargs} ${extra} ${optargs}"
+              initrd ${kern_dir}/initrd.lz
+            }
+
+    GRML:
+        Identified by /GRML dir in ISO
+            /conf/bootid.txt present (and required)
+        vmlinuz, initrd under:
+            grml32full: /boot/grml32full
+            grml64full: /boot/grml64full
+            grml96full: /boot/grml32full AND /boot/grml64full
+            grml32small: /boot/grml32small
+            grml64small: /boot/grml64small
+            grml96small: /boot/grml32small AND /boot/grml64small
+        No distro info available
+        Grub_config: http://git.marmotte.net/git/glim/tree/grub2/inc-grml.cfg
+        menu entry:
+            menuentry "Grml 2014.03 64bit" --class grml {
+              # Variables set from outside
+              set iso_dir="/iso"
+              set isoname="grml96-full_2014.03.iso"
+              set bootid="XXXX" from /conf/bootid.txt
+              set g_bits={32|64}
+              set g_size={small|full}
+
+              echo "Using ${isoname}..."
+
+              set isofile="${iso_dir}/${isoname}"
+              loopback loop $isofile
+              set media_path=live-media-path=/live/grml${g_bits}-${g_size}
+              set kern_dir=(loop)/boot/grml${g_bits}${g_size}
+              set kernel=vmlinuz
+              set vmlinuz=${kern_dir}/$kernel}
+              set bootargs="boot=live findiso=${isofile}"
+              set distargs="${media_path} bootid=${bootid}"
+              set extra="apm=power-off nomce"
+              set optargs=""
+              linux ${vmlinuz} ${bootargs} ${distargs} ${extra} ${optargs}
+              initrd ${kern_dir}/initrd.img
+            }
+
+    Knoppix:
+        Identified by /KNOPPIX dir in ISO
+        vmlinuz, initrd under /boot/isolinux
+            32-bit kernel: /boot/isolinux/linux
+            64-bit kernel: /boot/isolinux/linux64
+            initrd: /boot/isolinux/minirt.gz
+        info in /KNOPPIX/index_en.html - parse TITLE (top 10 lines)
+        info in /boot/isolinux/boot.msg: line 4, field 1
+            Returns something like 'KNOPPIX V7.6.1'
+        Extract with : ' '.join(l[3].split(None)[:2])
+        Reviewed v6.7 2011-09 CD and DVD
+        Grub_config:
+            http://git.marmotte.net/git/glim/tree/grub2/inc-knoppix.cfg
+        menu entry:
+            menuentry "Knoppix 7.2.0 CD" --class knoppix {
+              # Variables set from outside
+              set iso_dir="/iso"
+              set isoname="KNOPPIX_V7.2.0CD-2013-06-16-EN.iso"
+
+              echo "Using ${isoname}..."
+
+              set isofile="${iso_dir}/${isoname}"
+              loopback loop $isofile
+              set kern_dir=(loop)/boot/isolinux
+              set vmlinuz=${kern_dir}/linux
+              set bootargs="bootfrom=/dev/sda1${isofile} ramdisk_size=100000"
+              set distargs="libata.force=noncq hpsa.hpsa_allow_any=1"
+              set extra="lang=en apm=power-off nomce loglevel=1 tz=localtime"
+              set optargs=""
+              linux "${vmlinuz} ${bootargs} ${distargs} ${extra} ${optargs}"
+              initrd ${kern_dir}/minirt.gz
+            }
+
+    Debian
+        Identified by /debian dir in ISO
+        info in /.disk/info
+        vmlinuz, initrd under /live
+            vmlinuz=vmlinuz
+            initrd=initrd.img
+            extra_args="config"
+            optargs="quiet splash"
+        menu entry:
+            menuentry "Debian Live 7.4 amd64 XFCE Desktop" --class debian {
+              # Variables set from outside
+              set iso_dir="/iso"
+              set isoname="debian-live-7.4-amd64-xfce-desktop+nonfree.iso"
+
+              echo "Using ${isoname}..."
+
+              set isofile="${iso_dir}/${isoname}"
+              loopback loop $isofile
+              set kern_dir=(loop)/live
+              set vmlinuz=${kern_dir}/vmlinuz
+              set bootargs="boot=live findiso=${isofile} config"
+              set distargs=""
+              set extra=""
+              set optargs="quiet splash"
+              linux "${vmlinuz} ${bootargs} ${distargs} ${extra} ${optargs}"
+              initrd ${kern_dir}/initrd.img
+            }
+
+    LinuxMint
+        Identification:
+            Ubuntu-derivative, but does NOT have /ubuntu dir
+            /README.diskdefines file contains line looking like:
+                #define DISKNAME  Linux Mint 18.1 "Serena" - Release amd64
+            info in /.disk/info contains
+                Linux Mint 18.1 "Serena" - Release amd64 20161213
+            Look for info starting with 'Linux Mint'
+        vmlinuz, initrd under /casper
+        Rest like Ubuntu
+
+    TinyCoreLinux
+        Identification
+            Debian-derivative, but does not have explicit dir /file
+            Could look for /boot/tinycore.gz or /boot/microcore.gz
+        vmlinuz, initrd under /boot
+            vmlinuz=/boot/bzImage
+            initrd=/boot/tinycore.gz or microcore.gz
+            extra_args="quiet max_loop=256"
+        menu entry:
+            menuentry "TinyCoreLinux" --class debian {
+              # Variables set from outside
+              set iso_dir="/iso"
+              set isoname="tinycore-current.iso"
+              set initrd_gz={tiny|micro}core.gz
+
+              echo "Using ${isoname}..."
+
+              set isofile="${iso_dir}/${isoname}"
+              loopback loop $isofile
+              set kern_dir=(loop)/boot
+              set vmlinuz=${kern_dir}/bzImage
+              set bootargs=""
+              set distargs=""
+              set extra="quiet max_loop=256"
+              set optargs=""
+              linux "${vmlinuz} ${bootargs} ${distargs} ${extra} ${optargs}"
+              initrd ${kern_dir}/${initrd_gz}
+            }
+    PuppyLinux
+        Identification
+            Debian-derivative, does not have dir /file to identify it
+            Not even in /boot.msg / /help.msg / /README.HTM
+            Look for /puppy_*.sfs
+        vmlinuz, initrd under /
+            vmlinuz=/vmlinuz
+            initrd=/boot/initrd.gz
+            extra_args="pmedia=cd"
+        menu entry:
+            menuentry "PuppyLinux" --class debian {
+              # Variables set from outside
+              set iso_dir="/iso"
+              set isoname="tahr64-6.0.5.iso"
+
+              echo "Using ${isoname}..."
+
+              set isofile="${iso_dir}/${isoname}"
+              loopback loop $isofile
+              set kern_dir=(loop)/
+              set vmlinuz=${kern_dir}/vmlinuz
+              set bootargs=""
+              set distargs=""
+              set extra="pmedia=cd"
+              set optargs=""
+              linux "${vmlinuz} ${bootargs} ${distargs} ${extra} ${optargs}"
+              initrd ${kern_dir}/initrd.gz
+            }

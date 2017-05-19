@@ -1,0 +1,26 @@
+
+Showing boot entries:
+
+	efibootmgr -v
+
+
+Delete a boot entry
+
+	efibootmgr -b <num> -B
+
+Add a boot entry:
+
+	efibootmgr 
+		-c			(create)
+		-d <boot_device>        (e.g. /dev/sda)
+		-l <efi_app_file>       (e.g. /EFI/Ubuntu/grubia32.efi)
+                -L <entry_name>
+		-p 1			(partition number)
+		-w			(write signature)
+
+	efi_app_file path can use forward (/) or back (\) slashes
+	If using back (\) slashes, MUST escape EACH one as TWO (\\)
+	back slashes
+
+	efi_app_file can be ALL UPPER CASE _OR_ actual case
+

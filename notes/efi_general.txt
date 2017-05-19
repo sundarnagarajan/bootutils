@@ -1,0 +1,303 @@
+
+Factors:
+-------
+  - Motherboard firmware
+	Legacy (MBR) boot ONLY
+	EFI ONLY
+	Legacy (MBR) or EFI
+
+  - EFI Security mode - only applies to EFI firmware
+	- Optional secure mode
+	- Secure mode ONLY
+
+  - EFI loader architecture
+	- x86_64 - most newer motherboards
+	- ia32 (i386-efi) - some BayTrail / CherryTrail boards etc
+
+  - Boot media partition table
+	- Legacy (DOS MBR) partition table
+	- GPT
+
+  - EFI Application
+	- Signing status
+	    - Signed - works in either EFI Security modes
+	    - Unsigned - works ONLY in EFI Optional secure mode
+
+	- Architecture
+	    - x86_64 (x86_64-efi)
+	    - ia32 (i386-efi)
+	
+	- Grub EFI application embedded config
+		- Including root FS UUID and prefix
+		- No root FS UUID or prefix	
+
+  - Linux kernel architecture
+	- amd64 (x86_64)
+	- i386 (ia32)
+
+  - Userspace application architecture
+	- amd64 (x86_64)
+	- i386 (ia32)
+
+Constraints:
+-----------
+  - ONLY EFI-compatible boards can boot media requiring EFI
+
+  - Only Legacy (MBR)-compatible boards can boot legacy MBR media
+
+  - EFI firmware and EFI booting REQUIRES GPT partition table
+  - EFI is INCOMPATIBLE with Legacy (DOS MBR) partition tables
+  - EFI REQUIRES a single partition of type EF00 (in gdisk / sgdisk)
+	Typical size is <= 100 MB
+  - Doing legacy (MBR) grub-install on a GPT disk is an open issue
+
+  - 32-bit (ia32) EFI loaders can ONLY boot 32-bit (ia32) EFI applications
+  - 64-bit (x86_64) EFI loaders can ONLY boot 64-bit (x86_64) EFI applications
+
+  - 32-bit (i386) Linux kernels can only run 32-bit userspace applications
+
+  - Grub EFI applications with (correct) embedded config will show grub menu
+  - Grub EFI applications without embedded config will only show grub prompt
+
+
+Non-constraints:
+---------------
+  - 32-bit (ia32) Grub EFI application can load 32-bit and 64-bit kernels
+  - 64-bit (x86_64) Grub EFI application can load 32-bit and 64-bit kernels
+  - 64-bit (amd64) Linux kernels can run 32-bit and 64-bit userspace applications
+  - The same boot medium can support 32-bit and 64-bit EFI loaders
+  - The same boot medium can support EFI and Legacy motherboards
+	However, this requires figuring out how to do non-EFI grub-install
+	on a GPT disk (not yet figured out)
+
+
+Checking whether your motherboard is EFI-compatible from within Linux:
+---------------------------------------------------------------------
+  - Motherboard firmware is EFI-only:
+	- Obviously motherboard is EFI-compatible
+	- 'efibootmgr -v' command will produce meaningful output
+
+  - Motherboard firmware is Legacy (MBR) boot only:
+	- 'efibootmgr -v' command will produce output:
+		efibootmgr: EFI variables are not supported on this system.
+
+  - Motherboard supports Legacy (MBR) or EFI
+	- If current Linux OS was booted in EFI mode:
+		'efibootmgr -v' command will produce meaningful output
+
+	- If current Linux OS was booted in Legacy (MBR) mode:
+		'efibootmgr -v' command will produce output:
+			efibootmgr: EFI variables are not supported on this system.
+
+
+  - Alternative to using 'efibootmgr -v':
+	Check if /sys/firmware/efi/efivars exists
+
+  - EFI-related kernel config variables
+	grep '^CONFIG_EFI' /boot/config-4.10.0-10-linuxium 
+
+	CONFIG_EFI_PARTITION=y
+	CONFIG_EFI=y
+	CONFIG_EFI_STUB=y
+	CONFIG_EFI_MIXED=y
+	CONFIG_EFI_VARS=y
+	CONFIG_EFI_ESRT=y
+	CONFIG_EFI_VARS_PSTORE=m
+	CONFIG_EFI_RUNTIME_MAP=y
+	CONFIG_EFI_RUNTIME_WRAPPERS=y
+	CONFIG_EFI_BOOTLOADER_CONTROL=m
+	CONFIG_EFI_CAPSULE_LOADER=m
+	CONFIG_EFI_TEST=m
+	CONFIG_EFIVAR_FS=y
+
+
+Creating EFI-compatible boot media:
+----------------------------------
+
+  Scripts:
+  -------
+	create_format_efi_partition:
+	  - Create EFI partition and format as VFAT
+	  - Add 32-bit and 64-bit Grub2 EFI applications to EFI partition
+
+	zap_disk_create_efi:
+	  - Zap ALL partitions and partition table data
+	  - Create GPT partition table
+	  - Call create_format_efi_partition
+
+
+  - Set basic vars
+	DEVICE_PATH=/dev/sda
+	ROOT_PARTITION=/dev/sda2
+	BOOT_ENTRY_NAME=USB-Ubuntu
+	EFI_FILENAME_32BIT=bootia32.efi       # CANNOT change name
+	EFI_FILENAME_64BIT=bootx64.efi        # CANNOT change name
+
+
+  - Create a GPT partition table
+	# ZAP all partitions, and partition table data
+	sgdisk -Z $DEVICE_PATH
+	# Create a GPT table
+	sgdisk -o $DEVICE_PATH
+
+  - Create EFI partition
+	SIZE_EFI=+100M
+	LABEL_EFI=EFI
+	TYPE_EFI=EF00
+	sgdisk --new=0:0:${SIZE_EFI} -t 0:${TYPE_EFI} -c 0:${LABEL_EFI} <DEVICE_PATH>
+
+  - Set EFI_PARTITION
+	EFI_PARTITION=${DEVICE_PATH}1
+
+  - Format EFI partition as VFAT
+	mkfs.vfat -n EFI ${EFI_PARTITION}
+
+  - Create EFI directories
+	mount ${EFI_PARTITION} /media/efi
+	cd /media/efi
+	mkdir -p EFI/BOOT
+
+  - Get FS UUID of ROOT partition FS
+	# Assumes root partition created, formatted
+	# Population of root partition can happen before or after
+	FS_UUID=$(blkid -s UUID -o value ${ROOT_PARTITION})
+
+  - Create standardized (reusable) Grub2 EFI applcations: 
+	use grub-mkstandalone to:
+	  - Include ALL modules, commands, locales, themes
+	  - Include a short initial config in a mmedisk
+		- Loads critical modules like part_gpt
+		- Sets root to EFI partition
+		- Finds and loads actual grub.cfg (/EFI/grub/grub.cfg)
+
+	Contents of short initial config
+	  # 1-based partition number for EFI partition
+	  set partnum=1
+	  # Full path to grub.cfg UNDER EFI partition
+	  set cfgfile=/efi/grub/grub.cfg
+
+	  # ------------------------------------------------------------------------
+	  # Should not need to change anything below this
+	  # ------------------------------------------------------------------------
+	  insmod part_gpt
+	  set root=(hd0,gpt$partnum)
+	  if [ -f ($root)$cfgfile ]; then
+	      configfile ($root)$cfgfile
+	  fi
+~       
+	Example:
+	  CFG=/root/grub_initial.config   # location of file
+
+	  cd /media/efi/EFI/BOOT
+	  grub-mkimage --format=i386-efi --output=$EFI_FILENAME_32BIT "boot/grub/grub.cfg=$CFG"
+	  grub-mkimage --format=x86_64-efi --output=$EFI_FILENAME_64BIT "boot/grub/grub.cfg=$CFG"
+          mkdir -p /media/efi/grub
+
+          In the rootfs:
+	    ln -sf /boot/grub /boot/efi/grub
+
+	grub-mkdevicemap and grub-mkconfig will transparently traverse
+	the /boot/grub symlink to create / update files under /boot/efi/grub EVEN IF
+	files under /boot/efi/grub are removed
+
+	With this method, under /boot:
+	  /boot/efi               --> mountpoint for EFI/ESP partition
+          /boot/efi/grub          --> grub-related files
+		grub.cfg
+		device.map .... etc
+	  /boot/efi/EFI           --> EFI-related files
+	  /boot/efi/EFI/BOOT      --> default / fallback EFI boot application
+          /boot/efi/EFI/Linux     --> EFI boot entry named Linux (example)
+	  /boot/grub              --> symlink to /boot/efi/grub
+
+	  /boot/vmlinuz           --> kernel
+          /boot/initrd.img        --> initrd
+          ...                     --> rest as is usual under /boot
+
+  - Create named boot entry dir
+	mkdir -p /media/efi/EFI/${BOOT_ENTRY_NAME}
+	cd /media/efi/EFI/${BOOT_ENTRY_NAME}
+	cp /media/efi/EFI/BOOT/$EFI_FILENAME_32BIT grub.efi
+	cp /media/efi/EFI/BOOT/$EFI_FILENAME_32BIT grubia32.efi
+	cp /media/efi/EFI/BOOT/$EFI_FILENAME_64BIT grubx64.efi
+
+Links:
+-----
+
+Managing EFI Boot Loaders for Linux:
+http://rodsbooks.com/efi-bootloaders/index.html
+
+Managing EFI Boot Loaders for Linux: Basic Principles
+http://rodsbooks.com/efi-bootloaders/principles.html
+
+Managing EFI Boot Loaders for Linux: EFI Boot Loader Installation
+http://rodsbooks.com/efi-bootloaders/installation.html
+
+Managing EFI Boot Loaders for Linux: Using GRUB 2
+http://rodsbooks.com/efi-bootloaders/grub2.html
+
+Managing EFI Boot Loaders for Linux: Dealing with Secure Boot
+http://rodsbooks.com/efi-bootloaders/secureboot.html
+
+Managing EFI Boot Loaders for Linux: Controlling Secure Boot
+http://rodsbooks.com/efi-bootloaders/controlling-sb.html
+
+UEFI Booting (Ubuntu wiki, but is fairly distro-agnostic):
+https://help.ubuntu.com/community/UEFIBooting
+
+Building GRUB 2 UEFI (Ubuntu wiki):
+https://help.ubuntu.com/community/UEFIBooting#Building_GRUB2_.28U.29EFI
+
+Install GRUB 2 in UEFI systems (Ubuntu wiki):
+https://help.ubuntu.com/community/UEFIBooting#Install_GRUB2_in_.28U.29EFI_systems
+
+Good Gentoo Grub2 tutorial / tips:
+	https://wiki.gentoo.org/wiki/GRUB2/Chainloading
+
+Good description of concepts and comparison of EFI vs. Legacy
+    http://wiki.osdev.org/UEFI
+
+ArchWiki entry for UEFI:
+    https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface
+
+ArchWiki section on 'UEFI Firmware bitness':
+    https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface#UEFI_Firmware_bitness
+
+ArchWiki - adding a new boot option using efibootmgr:
+    https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface#efibootmgr
+
+Linux EFI Boot Stub @Intel:
+    https://firmware.intel.com/blog/linux-efi-boot-stub
+
+gummiboot (now called systemd-boot) @ArchWiki:
+    https://wiki.archlinux.org/index.php/systemd-boot
+
+Make single-file rescue disk for UEFI systems:
+    https://github.com/haraldh/mkrescue-uefi
+
+bootctl is part of systemd since verseion 220
+    Replaces gummiboot
+
+UEFI tutorial videos (Linux Plumbers Conference 2012):
+    Part 1: https://linuxplumbers.ubicast.tv/videos/uefi-tutorial-part-1/
+    Part 2: http://linuxplumbers.ubicast.tv/videos/uefi-tutorial-part-2/
+    Plumbing UEFI into Linux: https://linuxplumbers.ubicast.tv/videos/plumbing-uefi-into-linux/
+
+
+EFI Shell official documentation @Intel
+    UEFI Shell: https://software.intel.com/en-us/articles/uefi-shell/
+    EFI Shells and scripting: https://software.intel.com/en-us/articles/efi-shells-and-scripting/
+
+    UEFI Shell bcfg command: http://www.hpuxtips.es/?q=node/293
+
+EFI Boot process:
+    https://software.intel.com/en-us/articles/efi-shells-and-scripting/
+
+Official UEFI specifications:
+    http://uefi.org/specifications
+
+How does UEFI Boot work:
+    https://www.happyassassin.net/2014/01/25/uefi-boot-how-does-that-actually-work-then/
+
+    Good section on boot manager entries - and 'fallback path'
+    

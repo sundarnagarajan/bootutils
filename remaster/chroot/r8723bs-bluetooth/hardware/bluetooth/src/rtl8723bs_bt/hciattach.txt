@@ -1,0 +1,85 @@
+Realtek Bluetooth init uart with init speed:115200, final_speed:115200, type:HCI UART H5
+Realtek Bluetooth :Realtek hciattach version 2.5 
+
+Realtek Bluetooth :3-wire sync pattern resend : 1, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 2, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 3, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 4, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 5, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 6, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 7, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 8, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 9, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 10, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 11, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 12, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 13, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 14, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 15, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 16, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 17, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 18, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 19, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 20, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 21, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 22, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 23, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 24, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 25, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 26, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 27, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 28, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 29, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 30, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 31, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 32, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 33, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 34, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 35, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 36, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 37, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 38, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 39, len: 8
+
+Realtek Bluetooth :3-wire sync pattern resend : 40, len: 8
+
+Realtek Bluetooth ERROR: H5 sync timed out
+
