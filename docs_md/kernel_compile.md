@@ -21,7 +21,7 @@ Edit the first few lines to set
 
 
 ## Script
-```
+```bash
 #!/bin/bash
 LINUX_NEXT_COMMIT=db55616926f9e4826d266795f17512c77fe1bc8c
 # Path to config file relative to dir with this script
