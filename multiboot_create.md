@@ -196,6 +196,7 @@ MountedDir: Executing: umount /media/tmp_MountedDir_3MNek3
 MountedDir: Executing: mount /dev/sds2 /media/tmp_MountedDir_lGAH9o
 MountedDir: Executing: umount /media/tmp_MountedDir_lGAH9o
 MountedDir: Executing: mount /dev/sds2 /media/tmp_MountedDir_0JSr6q
-grub-install: error: /usr/lib/grub/i386-pc/modinfo.sh doesn't exist. Please specify --target or --directory.
+Installing for i386-pc platform.
+Installation finished. No error reported.
 MountedDir: Executing: umount /media/tmp_MountedDir_0JSr6q
 ```
