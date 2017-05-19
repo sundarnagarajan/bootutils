@@ -83,6 +83,8 @@ ubuntu_remaster_iso.sh ISO_PATH EXTRACT_DIR OUTPUT_ISO
 | chroot | 06_install_grub_packages.sh | Install UEFI-i386 UEFI-amd64 and non-UEFI grub packages | Enabled |
 | chroot | 07_apt_cleanup.sh | apt autoremove and cleanup apt cache | Enabled |
 | chroot | 08_copy_scripts.sh | Copy scripts under /root/remaster | Enabled |
+| iso_post | 01_iso_kernel.sh | Update kernel in ISO (live session) if kernel was updated in chroot stage by ```02_install_kernels.sh```. Does nothing otherwise | Enabled |
+| iso_post | 02_update_efi.sh | Makes ISO bootable in 32-bit and 64-bit EFI loaders | Enabled |
 
 ## File layout
 ```
