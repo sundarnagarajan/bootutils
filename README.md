@@ -15,6 +15,7 @@ Utilities to create bootable disks, remaster ISO images, make multiboot disk ima
 - You want to install additional packages that are available in the live session **AND** carried into the installed image
 - You want to add additional files - e.g. utilities, scripts, data files - that are available in the live session **AND** carried into the installed image
 - You want to make a UEFI-compatible 64-bit Linux ISO image bootable on a machine with a 32-bit EFI loader
+- You want to create an updated ISO with all packages updated
 
 ### Use case 3: Create boot disk on separate disk
 - You have a disk that is seen and usable under Linux, but is not seen by the BIOS / UEFI - e.g. newer PCI-Express NVME M.2 disks
