@@ -72,6 +72,18 @@ ubuntu_remaster_iso.sh ISO_PATH EXTRACT_DIR OUTPUT_ISO
 - Do not choose ```REMASTER_CMDS_DIR``` to be a directory name containing spaces / special characters
 - Do not use spaces or special characters in names of commands in ```commands``` directory
 
+## Sample remaster commands
+| Stage | Command | What it does | Default state |
+| ----- | ------- | ------------ | ------------- |
+| chroot | 01_install_firmware.sh | Install firmware required by RTL 8723bs Wifi chipset | Disabled |
+| chroot | 02_install_kernels.sh | Install custom kernels does nothing if kernel_debs dir is empty | Enabled |
+| chroot | 03_remove_old_kernels.sh | Removes all kernels **EXCEPT** kernels installed by ```02_install_kernels.sh```. Does nothing if ```02_install_kernels.sh``` did nothing | Enabled |
+| chroot | 04_install_r8723_bluetooth.sh | Install systemd service and udev rules to make Bluetooth work on RTL 8723bs chipset | Disabled |
+| chroot | 05_update_all_packages.sh | Update all packages | Enabled |
+| chroot | 06_install_grub_packages.sh | Install UEFI-i386 UEFI-amd64 and non-UEFI grub packages | Enabled |
+| chroot | 07_apt_cleanup.sh | apt autoremove and cleanup apt cache | Enabled |
+| chroot | 08_copy_scripts.sh | Copy scripts under /root/remaster | Enabled |
+
 ## File layout
 ```
 bootutils  ---------- TOPLEVEL DIR
