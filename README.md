@@ -16,7 +16,7 @@ In the future, I intend to support major distributions, such as Fedora, Arch, GR
 ### Multiboot
 Multiboot refers to creating a bootable disk that can contain multiple bootable ISO images, supporting a boot-time menu to choose the ISO that you want to boot.
 
-Once a multiboot image is created, you can add ISO images by copying ISO files to *ISO* directory on the disk and run *multiboot_update_config.py* to automatically update the menu (*grub.cfg*).
+Once a multiboot image is created, you can add ISO images by copying ISO files to *ISO* directory on the disk and run ```multiboot_update_config.py``` to automatically update the menu (```grub.cfg```).
 
 Multiboot disk images support:
 - Booting on UEFI and non-UEFI host systems
@@ -49,5 +49,7 @@ Multiboot does **NOT** support ISOs that are not *live CD images* (such as Ubunt
 | grub-mkdevicemap | grub-common | 2.02~beta2-36ubuntu3.9 |
 | grub-mkconfig | grub-common | 2.02~beta2-36ubuntu3.9 |
 | grub-mkstandalone | grub-common | 2.02~beta2-36ubuntu3.9 |
+
+On Ubuntu (or other Debian-derived distributions, probably), you can run ```required_pkgs.sh``` to find the exact missing packages you need to install.
 
 
