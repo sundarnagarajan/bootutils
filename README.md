@@ -33,7 +33,7 @@ Multiboot supports the following distributions within as ISOs:
 
 In the future, I intend to support major distributions, such as Fedora, Arch, GRML, Red Hat etc.
 
-Multiboot does **NOT** support ISOs that are not *live CD images* (such as Ubuntu server install ISOs) and probably never will.
+Multiboot does **NOT** support ISOs that are not *_live CD images_* (such as Ubuntu server install ISOs) and probably never will.
 
 ## Commands and packages required
 
