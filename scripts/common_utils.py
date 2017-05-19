@@ -1,20 +1,4 @@
 #!/usr/bin/env python
-'''
-Uses the following commands, which _SHOULD_ normally be present in all
-(newer) Linux systems:
-    Command            Ubuntu package  Version tested
-    -------------------------------------------------------------------
-    lsblk              util-linux      2.27.1-6ubuntu3.2
-    parted             parted          3.2-15
-    sgdisk             gdisk           1.0.1-1build1
-    blkid              util-linux      2.27.1-6ubuntu3.2
-    umount             mount           2.27.1-6ubuntu3.2
-    mkfs.vfat          dosfstools      3.0.28-2ubuntu0.1
-    grub-install       grub2-common    2.02~beta2-36ubuntu3.9
-    grub-mkdevicemap   grub-common     2.02~beta2-36ubuntu3.9
-    grub-mkconfig      grub-common     2.02~beta2-36ubuntu3.9
-    grub-mkstandalone  grub-common     2.02~beta2-36ubuntu3.9
-'''
 
 import sys
 import subprocess
