@@ -6,7 +6,7 @@
 -  Extract squashfs
 -  Execute chroot scripts in chroot inside extracted squashfs
 -  Recreate modified squashfs
--  Execute iso_post scripts within extracted ISO (not chroot-ede)
+-  Execute iso_post scripts within extracted ISO (not chroot-ed)
 -  Recreate modified ISO
 
 ## Script plugin model
@@ -24,7 +24,9 @@ a directory named ```.remaster``` (within extracted ISO or whthin extracted squa
 - All **executable** files under ```commands``` dir will be executed in lexicographic order
 - If ```.remaster/commands/commands.list``` is present, only executable files under ```.remaster/commands``` listed in ```.remaster/commands/commands.list``` are executed.
 - ```.remaster/commands/commands.list``` itself is **NEVER** executed - even if present and executable.
+- For each command the working directory will be .remaster/commands
 - ```.remaster``` will be deleted after **EACH** stage. Anything that needs to be kept needs to be copied by a script under ```.remaster/commands```.
+- In the case of ```chroot```, commands are executed after chroot-ing into the extracted squashfs - so ```.remaster``` will be ```/.remaster```
 
 ## Execute iso_pre scripts within extracted ISO (not chroot-ed)
 
@@ -42,18 +44,7 @@ bootutils  ---------- TOPLEVEL DIR
 │
 │
 └── remaster
-    ├── chroot  ----- Everything under this is copied under /.remaster in squashfs
-    │   │             and /.remaster/toplevel.sh is executed in CHROOT which will run
-    │   │             all executable files under /.remaster/commands in lexicographic
-    │   │             order
-    │   │             if /.remaster/commands/commands.list is present only executable files
-    │   │             under /.remaster/commands listed in /.remaster/commands/commands.list
-    │   │             are executed. /.remaster/commands/commands.list is NEVER executed -
-    │   │             even if present and executable
-    │   │
-    │   │             /.remaster will be deleted after this step - anything that needs
-    │   │             to be kept needs to be copied by a script under /.remaster/commands
-    │   │
+    ├── chroot
     │   │
     │   ├── commands
     │   │   ├── commands.list
@@ -74,20 +65,7 @@ bootutils  ---------- TOPLEVEL DIR
     │   └── scripts - example (used by 01_copy_scripts.sh)
     │
     │
-    ├── iso_post ---- Everything in this directory is copied under /.remaster in ISO
-    │   │             extract directory. This is done AFTER executing under chroot
-    │   │             OVERWRITING (but NOT deleting) anything that may have been in
-    │   │             that dir after running iso_pre. /.remaster/toplevel.sh is
-    │   │             executed, which will run all executable files under
-    │   │             /.remaster/commands in lexicographic order
-    │   │             if /.remaster/commands/commands.list is present only executable files
-    │   │             under /.remaster/commands listed in /.remaster/commands/commands.list
-    │   │             are executed. /.remaster/commands/commands.list is NEVER executed -
-    │   │             even if present and executable
-    │   │ 
-    │   │             /.remaster will be deleted after this step - anything that needs
-    │   │             to be kept needs to be copied by a script under /.remaster/commands
-    │   │
+    ├── iso_post
     │   │ 
     │   ├── commands
     │   │   ├── 01_iso_kernel.sh
@@ -96,18 +74,7 @@ bootutils  ---------- TOPLEVEL DIR
     │   └── efi - example used by 02_update_efi.sh
     │
     │
-    └── iso_pre ----- Everything in this directory is copied under /.remaster in ISO
-        │             This is done BEFORE executing under chroot
-        │             /.remaster/toplevel.sh is, which will run all executable files under
-        │             /.remaster/commands in lexicographic order
-        │             if /.remaster/commands/commands.list is present only executable files
-        │             under /.remaster/commands listed in /.remaster/commands/commands.list
-        │             are executed. /.remaster/commands/commands.list is NEVER executed -
-        │             even if present and executable
-        │
-        │             /.remaster will NOT be deleted after this step - will be deleted
-        │             after iso_post step
-        │
+    └── iso_pre
         │ 
         └── commands
 ```
