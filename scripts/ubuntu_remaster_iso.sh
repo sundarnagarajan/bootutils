@@ -30,12 +30,16 @@ if [ -z "$3" ]; then
     exit 1
 fi
 
-REMASTER_CMDS_DIR=${PROG_DIR}/../remaster
-if [ ! -d $REMASTER_CMDS_DIR ]; then
-    echo "REMASTER_CMDS_DIR not a directory: $REMASTER_CMDS_DIR"
-    exit 1
+if [ -z "$REMASTER_CMDS_DIR" ]; then
+    REMASTER_CMDS_DIR=${PROG_DIR}/../remaster
 fi
-REMASTER_CMDS_DIR=$(readlink -e $REMASTER_CMDS_DIR)
+if [ -d $REMASTER_CMDS_DIR ]; then
+    REMASTER_CMDS_DIR=$(readlink -e $REMASTER_CMDS_DIR)
+else
+    echo "REMASTER_CMDS_DIR not a directory: $REMASTER_CMDS_DIR"
+    echo "Ignoring REMASTER_CMDS_DIR"
+    REMASTER_CMDS_DIR=""
+fi
 
 ISO_PATH="$1"
 EXTRACT_DIR="$2"
@@ -44,7 +48,11 @@ OUTPUT_ISO="$3"
 extract_iso "$ISO_PATH" "$EXTRACT_DIR" || exit 1
 extract_squashfs "$EXTRACT_DIR" "${ISO_EXTRACT_SUBDIR}"/"$SQUASHFS_PATH" || exit 1
 
-run_remaster_commands "$EXTRACT_DIR" "${REMASTER_CMDS_DIR}"
+if [ -n "$REMASTER_CMDS_DIR" ]; then
+    run_remaster_commands "$EXTRACT_DIR" "${REMASTER_CMDS_DIR}"
+else
+    echo "No REMASTER_CMDS_DIR. Not running any remaster commands"
+fi
 
 update_squashfs "$EXTRACT_DIR" "$SQUASHFS_PATH" "${MANIFEST_PATH}" "${SIZE_FILE}"
 update_iso "$EXTRACT_DIR" "${OUTPUT_ISO}" "$ISO_PATH" "$EFI_IMG_FILE" 
