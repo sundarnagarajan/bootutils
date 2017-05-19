@@ -1,3 +1,22 @@
+
+# ubuntu_remaster_iso.sh
+## Remastering stages
+-  Extract ISO contents
+-  Execute iso_pre scripts within extracted ISO (not chroot-ed)
+-  Extract squashfs
+-  Execute chroot scripts in chroot inside extracted squashfs
+-  Recreate modified squashfs
+-  Execute iso_post scripts within extracted ISO (not chroot-ede)
+-  Recreate modified ISO
+
+## Execute iso_pre scripts within extracted ISO (not chroot-ed)
+
+## Execute chroot scripts in chroot inside extracted squashfs
+
+## Execute iso_post scripts within extracted ISO (not chroot-ede)
+
+## File layout
+```
 bootutils  ---------- TOPLEVEL DIR
 │
 ├── scripts  -------- Boot-disk related
@@ -74,3 +93,5 @@ bootutils  ---------- TOPLEVEL DIR
         │
         │ 
         └── commands
+```
+
