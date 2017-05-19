@@ -927,9 +927,9 @@ class DiskDetails(object):
             os.mkdir(iso_dir)
             os.makedirs(efi_boot_dir)
 
-        self.multiboot_instal_grub()
+        self.multiboot_install_grub()
 
-    def multiboot_instal_grub(self):
+    def multiboot_install_grub(self):
         '''
         Installs grub-efi under /EFI/BOOT on EFI partition
         Installs grub-mbr in MBR

@@ -22,4 +22,4 @@ if __name__ == '__main__':
     msg = 'Confirm disk to update grub. Data will not be affected %s' % (
         d.devpath,)
     if d.confirm_action(msg):
-        d.multiboot_instal_grub()
+        d.multiboot_install_grub()
