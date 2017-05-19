@@ -13,6 +13,8 @@ Remastering ISOs is *currently* supported **ONLY for Ubuntu ISOs**. This include
 
 In the future, I intend to support major distributions, such as Fedora, Arch, GRML, Red Hat etc.
 
+The sample remastering scripts included are Ubuntu-specific.
+
 ### Multiboot
 Multiboot refers to creating a bootable disk that can contain multiple bootable ISO images, supporting a boot-time menu to choose the ISO that you want to boot.
 
@@ -33,7 +35,7 @@ Multiboot supports the following distributions within as ISOs:
 
 In the future, I intend to support major distributions, such as Fedora, Arch, GRML, Red Hat etc.
 
-Multiboot does **NOT** support ISOs that are not *_live CD images_* (such as Ubuntu server install ISOs) and probably never will.
+Multiboot does **NOT** support ISOs that are not **live CD images** (such as Ubuntu server install ISOs) and probably never will.
 
 ## Commands and packages required
 
