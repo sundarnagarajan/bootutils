@@ -1,8 +1,12 @@
 # bootutils
 Utilities to create bootable disks, remaster ISO images, make multiboot disk images
 
+## Operating system support
+Linux
+No effort spent on supporting other OS
+
 ## Linux distributions supported
-The scripts should work on any *modern* Linux distribution. I test on Ubuntu Xenian 16.04.2 LTS. The list of packages required are specific to Ubuntu (Xenial), but the dependency is based on OS commands requried and the OS commands required are listed below, to allow usage on virtually any Linux distribution.
+The scripts should work on any *modern* Linux distribution. I test on Ubuntu Xenial 16.04.2 LTS. The list of packages required are specific to Ubuntu (Xenial), but the dependency is based on OS commands requried and the OS commands required are listed below, to allow usage on virtually any Linux distribution.
 
 ### Remastering ISOs
 Remastering ISOs is *currently* supported **ONLY for Ubuntu ISOs**. This includes:
