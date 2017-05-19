@@ -80,7 +80,7 @@ Enter "YES" to confirm:
 ```
 
 If the disk you chose had an ISO image or in some other way, did NOT have 
-a valid partition table, the output would look like teh following:
+a valid partition table, the output would look like the following:
 
 ```
 Scanning partitions on /dev/sds
