@@ -2,11 +2,8 @@
 # ubuntu_remaster_iso.sh
 ## Remastering stages
 -  Extract ISO contents
--  Execute iso_pre scripts within extracted ISO (not chroot-ed)
 -  Extract squashfs
--  Execute chroot scripts in chroot inside extracted squashfs
 -  Recreate modified squashfs
--  Execute iso_post scripts within extracted ISO (not chroot-ed)
 -  Recreate modified ISO
 
 ## Script plugin model
