@@ -16,14 +16,15 @@ At each of the following stages, one or more scripts can be run
 - chroot: **after** extracting squashfs within extracted squashfs as chroot
 - iso_post **after** creating (modified) squashfs, **before** recreating modified ISO
 
-At each stage, the corresponding directory structure under ```remaster``` is copied to
-a directory named ```.remaster``` (within extracted ISO or whthin extracted squashfs as the case may be). If that directory already existed, it is deleted and overwritten.
+At each stage, the following happens:
 
-All **executable** files under ```commands``` dir will be executed in lexicographic order
-
-If ```.remaster/commands/commands.list``` is present, only executable files under ```.remaster/commands``` listed in ```.remaster/commands/commands.list``` are executed. ```.remaster/commands/commands.list``` itself is **NEVER** executed - even if present and executable.
-
-```.remaster``` will be deleted after **EACH** stage. Anything that needs to be kept needs to be copied by a script under ```.remaster/commands```.
+- The corresponding directory structure under ```remaster``` is copied to
+a directory named ```.remaster``` (within extracted ISO or whthin extracted squashfs as the case may be).
+- If that directory already existed, it is deleted and overwritten.
+- All **executable** files under ```commands``` dir will be executed in lexicographic order
+- If ```.remaster/commands/commands.list``` is present, only executable files under ```.remaster/commands``` listed in ```.remaster/commands/commands.list``` are executed.
+- ```.remaster/commands/commands.list``` itself is **NEVER** executed - even if present and executable.
+- ```.remaster``` will be deleted after **EACH** stage. Anything that needs to be kept needs to be copied by a script under ```.remaster/commands```.
 
 ## Execute iso_pre scripts within extracted ISO (not chroot-ed)
 
