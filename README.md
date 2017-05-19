@@ -85,3 +85,7 @@ On Ubuntu (or other Debian-derived distributions, probably), you can run ```requ
 ## Help on individual utilities
 
 [multiboot_create.py](docs_md/multiboot_create.md)
+[multiboot_install_grub.py](docs_md/multiboot_install_grub.md)
+[multiboot_update_config.py](docs_md/multiboot_update_config.md)
+[bootdisk_create.py](docs_md/bootdisk_create.md)
+[Download, patch and compile kernel to DEB](docs_md/kernel_compile.md)
