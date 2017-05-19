@@ -82,4 +82,6 @@ Multiboot does **NOT** support ISOs that are not **live CD images** (such as Ubu
 
 On Ubuntu (or other Debian-derived distributions, probably), you can run ```required_pkgs.sh``` to find the exact missing packages you need to install.
 
+## Help on individual utilities
 
+[multiboot_create.py] (docs_md.multiboot_create.md)
