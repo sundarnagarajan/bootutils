@@ -14,29 +14,28 @@ if [ ! -d ${KERNEL_DEB_DIR} ]; then
     exit 0
 fi
 KERNEL_DEB_DIR=$(readlink -e $KERNEL_DEB_DIR)
+if [ -z "S(ls -A ${KERNEL_DEB_DIR}/*.deb 2>/dev/null)" ]; then
+    echo "No deb files in $KERNEL_DEB_DIR"
+    exit 0
+fi
 KP_LIST=kernel_pkgs.list
 KP_LIST=${KERNEL_DEB_DIR}/$KP_LIST
 
-if [ "S(ls -A ${KERNEL_DEB_DIR}/*.deb 2>/dev/null)" ]; then
-    if [ -x /etc/grub.d/30_os-prober ]; then
-        chmod -x /etc/grub.d/30_os-prober
-    fi
-    dpkg -i ${KERNEL_DEB_DIR}/*.deb 2>/dev/null
-    echo overlay >> /etc/initramfs-tools/modules
-    update-initramfs -u 2>/dev/null
+if [ -x /etc/grub.d/30_os-prober ]; then
+    chmod -x /etc/grub.d/30_os-prober
+fi
+dpkg -i ${KERNEL_DEB_DIR}/*.deb 2>/dev/null
+echo overlay >> /etc/initramfs-tools/modules
+update-initramfs -u 2>/dev/null
 
-    rm -f ${KP_LIST}
-    for f in ${KERNEL_DEB_DIR}/*.deb
-    do
-        dpkg-deb -f $f Package >> ${KP_LIST}
-    done
-    if [ -f ${KP_LIST} ]; then
-        echo "New kernel packages installed:"
-        cat ${KP_LIST} | sed -u -e 's/^/    /'
-        mkdir -p $REMASTER_DIR
-        cp ${KP_LIST} ${REMASTER_DIR}/
-    fi
-else
-    echo "No deb files in $KERNEL_DEB_DIR"
-    exit 0
+rm -f ${KP_LIST}
+for f in ${KERNEL_DEB_DIR}/*.deb
+do
+    dpkg-deb -f $f Package >> ${KP_LIST}
+done
+if [ -f ${KP_LIST} ]; then
+    echo "New kernel packages installed:"
+    cat ${KP_LIST} | sed -u -e 's/^/    /'
+    mkdir -p $REMASTER_DIR
+    cp ${KP_LIST} ${REMASTER_DIR}/
 fi
