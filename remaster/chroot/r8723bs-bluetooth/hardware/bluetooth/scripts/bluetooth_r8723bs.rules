@@ -1,1 +1,0 @@
-SUBSYSTEM=="bluetooth" RUN+="/root/hardware/bluetooth/scripts/bluetooth_udev_rules.sh"
