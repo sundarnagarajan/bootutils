@@ -5,14 +5,6 @@ scripts/isoparser is from https://github.com/barneygale/isoparser
 isoparser is UNMODIFIED and is licensed under the MIT license (identical to
 the original isoparser package).
 
-remaster/chroot/r8723bs-bluetooth/hardware/bluetooth/src/rtl8723bs_bt
-and remaster/chroot/r8723bs-bluetooth/hardware/bluetooth/rtl8723bs_bt
-are from https://github.com/lwfinger/rtl8723bs_bt by Larry Finger. This
-project does not include a LICENSE file. I hereby license these files
-under the GNU LESSER GENERAL PUBLIC LICENSE version 3 or later. If this
-project includes licensing at a later stage, the license of that project
-shall govern these files. Also see LICENSE file under these 2 directories.
-
 All other files in this project are licensed under the GNU LESSER GENERAL
 PUBLIC LICENSE version 3 or a later version of the GNU LESSER GENERAL
 PUBLIC LICENSE as per your choice. The terms of the GNU LESSER GENERAL
