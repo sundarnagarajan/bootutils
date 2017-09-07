@@ -93,5 +93,3 @@ On Ubuntu (or other Debian-derived distributions, probably), you can run ```requ
 [bootdisk_create.py](docs/bootdisk_create.md)
 
 [make_bootable.py](docs/make_bootable.md)
-
-[Download, patch and compile kernel to DEB](docs/kernel_compile.md)
