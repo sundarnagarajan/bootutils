@@ -84,14 +84,14 @@ On Ubuntu (or other Debian-derived distributions, probably), you can run ```requ
 
 ## Help on individual utilities
 
-[multiboot_create.py](docs_md/multiboot_create.md)
+[multiboot_create.py](docs/multiboot_create.md)
 
-[multiboot_install_grub.py](docs_md/multiboot_install_grub.md)
+[multiboot_install_grub.py](docs/multiboot_install_grub.md)
 
-[multiboot_update_config.py](docs_md/multiboot_update_config.md)
+[multiboot_update_config.py](docs/multiboot_update_config.md)
 
-[bootdisk_create.py](docs_md/bootdisk_create.md)
+[bootdisk_create.py](docs/bootdisk_create.md)
 
-[make_bootable.py](docs_md/make_bootable.md)
+[make_bootable.py](docs/make_bootable.md)
 
-[Download, patch and compile kernel to DEB](docs_md/kernel_compile.md)
+[Download, patch and compile kernel to DEB](docs/kernel_compile.md)
