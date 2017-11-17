@@ -17,7 +17,7 @@
 #       EXTRACT_DIR:   Dir to extract under. Will be created if required
 #       SQUASHFS_PATH: RELATIVE PATH of squashfs file within ISO
 # ------------------------------------------------------------------------
-PROG_PATH=${PROG_PATH:-$(readlink -e $0)}
+PROG_PATH=${PROG_PATH:-$(readlink -f $0)}
 PROG_DIR=${PROG_DIR:-$(dirname ${PROG_PATH})}
 PROG_NAME=${PROG_NAME:-$(basename ${PROG_PATH})}
 
