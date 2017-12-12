@@ -109,14 +109,34 @@ def get_distro(iso_path):
 
     # LinuxMint
     '''
-    info in /.disk/info contains
-        Linux Mint 18.1 "Serena" - Release amd64 20161213
-    Look for info starting with 'Linux Mint'
+    info in /.disk/info starts with 'Linux Mint'
     '''
     try:
         s = iso.record('.disk', 'info').content
         if s.startswith('Linux Mint'):
             return('linuxmint')
+    except:
+        pass
+
+    # trisquel
+    '''
+    info in /.disk/info starts with 'Trisquel '
+    '''
+    try:
+        s = iso.record('.disk', 'info').content
+        if s.startswith('Trisquel '):
+            return('trisquel')
+    except:
+        pass
+
+    # trisquel
+    '''
+    info in /.disk/info starts with 'elementary OS '
+    '''
+    try:
+        s = iso.record('.disk', 'info').content
+        if s.startswith('elementary OS '):
+            return('elementaryOS')
     except:
         pass
 
@@ -157,6 +177,8 @@ def get_instance(iso_path):
         'grml': GRMLISO,
         'knoppix': KnoppixISO,
         'linuxmint': LinuxMintISO,
+        'trisquel': TrisquelISO,
+        'elementaryOS': ElementaryOSISO,
         'tinycore': TinyCoreISO,
         'puppy': PuppyISO,
         'generic': GenericLinuxISO
@@ -181,6 +203,8 @@ class LinuxISO(object):
         - Ubuntu, official flavours
         - Unofficial Ubuntu flavours:
             - LinuxMint
+            - Trisquel
+            - elementary OS
         - Standard Debian - Jessie 8.0 stable tested
         - GRML - including combined 32-bit and 64-bit:
             - Daily builds work
@@ -355,6 +379,14 @@ class KnoppixISO(DebianISO):
 
 
 class LinuxMintISO(UbuntuISO):
+    pass
+
+
+class TrisquelISO(UbuntuISO):
+    pass
+
+
+class ElementaryOSISO(UbuntuISO):
     pass
 
 
