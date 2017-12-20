@@ -1,12 +1,29 @@
 #!/usr/bin/env python
+'''
+Uses the following commands, which _SHOULD_ normally be present in all
+(newer) Linux systems:
+    Command            Ubuntu package  Version tested
+    -------------------------------------------------------------------
+    lsblk              util-linux      2.27.1-6ubuntu3.2
+    parted             parted          3.2-15
+    sgdisk             gdisk           1.0.1-1build1
+    blkid              util-linux      2.27.1-6ubuntu3.2
+    umount             mount           2.27.1-6ubuntu3.2
+    mkfs.vfat          dosfstools      3.0.28-2ubuntu0.1
+    grub-install       grub2-common    2.02~beta2-36ubuntu3.9
+    grub-mkdevicemap   grub-common     2.02~beta2-36ubuntu3.9
+    grub-mkconfig      grub-common     2.02~beta2-36ubuntu3.9
+    grub-mkstandalone  grub-common     2.02~beta2-36ubuntu3.9
+'''
 
 import sys
-import subprocess
-import os
-import re
-import tempfile
-import shutil
-import time
+sys.dont_write_bytecode = True
+import subprocess  # noqa: E402
+import os  # noqa: E402
+import re  # noqa: E402
+import tempfile  # noqa: E402
+import shutil  # noqa: E402
+import time  # noqa: E402
 
 if sys.version_info[0] == 2:
     input = raw_input           # noqa F821
@@ -37,14 +54,16 @@ class MountedDir(object):
             cmd = 'mount %s %s %s' % (self.opts, self.src, self.dest)
         else:
             cmd = 'mount %s %s' % (self.src, self.dest)
-        sys.stderr.write('MountedDir: Executing: %s\n' % (cmd,))
+        if 'MOUNTDIR_DEBUG' in os.environ:
+            sys.stderr.write('MountedDir: Executing: %s\n' % (cmd,))
         subprocess.check_call(cmd, shell=True)
         time.sleep(1)
         return self.dest
 
     def __exit__(self, *args):
         cmd = 'umount %s' % (self.dest,)
-        sys.stderr.write('MountedDir: Executing: %s\n' % (cmd,))
+        if 'MOUNTDIR_DEBUG' in os.environ:
+            sys.stderr.write('MountedDir: Executing: %s\n' % (cmd,))
         try:
             subprocess.check_call(cmd, shell=True)
             time.sleep(1)

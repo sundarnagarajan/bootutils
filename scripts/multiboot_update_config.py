@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import sys
-import os
-from common_utils import require_root_or_exit
+sys.dont_write_bytecode = True
+import os  # noqa: E402
+from common_utils import require_root_or_exit  # noqa: E402
 from efiutils import (
     DiskDetails,
     show_available_disks,
-)
+)  # noqa: E402
 
 
 if __name__ == '__main__':

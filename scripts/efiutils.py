@@ -17,18 +17,19 @@ Uses the following commands, which _SHOULD_ normally be present in all
 '''
 
 import sys
-import subprocess
-import os
-import re
-from collections import namedtuple
-from itertools import count
-from multiboot import GrubMenu
+sys.dont_write_bytecode = True
+import subprocess  # noqa: E402
+import os  # noqa: E402
+import re  # noqa: E402
+from collections import namedtuple  # noqa: E402
+from itertools import count  # noqa: E402
+from multiboot import GrubMenu  # noqa: E402
 from common_utils import (
     MountedDirTemp,
     TempDir,
     LineWithComments,
     highlight_str,
-)
+)  # noqa: E402
 
 if sys.version_info[0] == 2:
     input = raw_input           # noqa F821
@@ -927,9 +928,9 @@ class DiskDetails(object):
             os.mkdir(iso_dir)
             os.makedirs(efi_boot_dir)
 
-        self.multiboot_install_grub()
+        self.multiboot_instal_grub()
 
-    def multiboot_install_grub(self):
+    def multiboot_instal_grub(self):
         '''
         Installs grub-efi under /EFI/BOOT on EFI partition
         Installs grub-mbr in MBR

@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 import sys
-from common_utils import require_root_or_exit
-from efiutils import DiskDetails, show_available_disks, erase_partition_table
+sys.dont_write_bytecode = True
+from common_utils import require_root_or_exit  # noqa: E402
+from efiutils import (
+    DiskDetails, show_available_disks, erase_partition_table
+)  # noqa: E402
 
 if __name__ == '__main__':
     require_root_or_exit()
