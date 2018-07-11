@@ -52,7 +52,7 @@ do
     CMD=${COMMANDS_DIR}/$f
 
     if [ ! -x ${CMD} ]; then
-        echo "${CMD} ${STAGE}: Ignoring non-executable file"
+        echo "$(basename ${CMD}) ${STAGE}: Ignoring non-executable file"
         continue
     fi
     echo "$(basename $CMD) ${STAGE}: Starting"
