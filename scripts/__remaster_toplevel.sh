@@ -53,6 +53,7 @@ do
 
     if [ ! -x ${CMD} ]; then
         echo "${CMD} ${STAGE}: Ignoring non-executable file"
+        continue
     fi
     echo "$(basename $CMD) ${STAGE}: Starting"
     $CMD 2>&1 | sed -u -e 's/^/    /'
