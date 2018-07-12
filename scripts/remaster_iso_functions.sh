@@ -17,7 +17,11 @@
 #       EXTRACT_DIR:   Dir to extract under. Will be created if required
 #       SQUASHFS_PATH: RELATIVE PATH of squashfs file within ISO
 # ------------------------------------------------------------------------
-PROG_PATH=${PROG_PATH:-$(readlink -f $0)}
+if [ -n "$BASH_SOURCE" ]; then
+    PROG_PATH=${PROG_PATH:-$(readlink -e $BASH_SOURCE)}
+else
+    PROG_PATH=${PROG_PATH:-$(readlink -e $0)}
+fi
 PROG_DIR=${PROG_DIR:-$(dirname ${PROG_PATH})}
 PROG_NAME=${PROG_NAME:-$(basename ${PROG_PATH})}
 
@@ -152,39 +156,34 @@ function run_remaster_commands {
     # iso_pre
     REMASTER_STAGE=${ISO_PRE_CMD_DIR}
     local local_src_dir=${local_remaster_cmds_dir}/${REMASTER_STAGE}
-    if [ -d $local_src_dir ]; then
-        sudo mkdir -p  $local_iso_dir/${TMP_REMASTER_DIR}
-        sudo \cp -af ${local_src_dir} $local_iso_dir/${TMP_REMASTER_DIR}
-        \cp -f ${PROG_DIR}/__remaster_toplevel.sh $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD}
-        REMASTER_STAGE=$REMASTER_STAGE $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD} 2>&1 | tee -a $local_remaster_log
-    fi
+    sudo \cp -af ${local_src_dir} $local_iso_dir/${TMP_REMASTER_DIR}
+    \cp -f ${PROG_DIR}/__remaster_toplevel.sh $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD}
+    REMASTER_STAGE=$REMASTER_STAGE $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD} 2>&1 | tee -a $local_remaster_log
 
     # chroot
     REMASTER_STAGE=${CHROOT_CMD_DIR}
     local_src_dir=${local_remaster_cmds_dir}/${REMASTER_STAGE}
-    if [ -d $local_src_dir ]; then
-        sudo \cp -af ${local_src_dir} $local_chroot_dir/${TMP_REMASTER_DIR}
-        \cp -f ${PROG_DIR}/__remaster_toplevel.sh $local_chroot_dir/${TMP_REMASTER_DIR}/${TOP_CMD}
+    sudo \cp -af ${local_src_dir} $local_chroot_dir/${TMP_REMASTER_DIR}
+    \cp -f ${PROG_DIR}/__remaster_toplevel.sh $local_chroot_dir/${TMP_REMASTER_DIR}/${TOP_CMD}
 
-        # bind mounts for chroot
-        for d in dev run
-        do
-            mount --bind /$d $local_chroot_dir/$d
-        done
-        mount -t proc none $local_chroot_dir/proc
-        mount -t sysfs none $local_chroot_dir/sys
-        mount -t devpts none $local_chroot_dir/dev/pts
+    # bind mounts for chroot
+    for d in dev run
+    do
+        mount --bind /$d $local_chroot_dir/$d
+    done
+    mount -t proc none $local_chroot_dir/proc
+    mount -t sysfs none $local_chroot_dir/sys
+    mount -t devpts none $local_chroot_dir/dev/pts
 
-        sudo REMASTER_STAGE=$REMASTER_STAGE chroot $local_chroot_dir /${TMP_REMASTER_DIR}/${TOP_CMD} 2>&1 | tee -a $local_remaster_log
+    sudo REMASTER_STAGE=$REMASTER_STAGE chroot $local_chroot_dir /${TMP_REMASTER_DIR}/${TOP_CMD} 2>&1 | tee -a $local_remaster_log
 
-        # unmount chroot bind mounts
-        for d in proc sys dev/pts dev run
-        do
-            umount $local_chroot_dir/$d || umount -lf $local_chroot_dir/$d
-        done
+    # unmount chroot bind mounts
+    for d in proc sys dev/pts dev run
+    do
+        umount $local_chroot_dir/$d || umount -lf $local_chroot_dir/$d
+    done
 
-        \rm -rf $local_chroot_dir/${TMP_REMASTER_DIR}
-    fi
+    \rm -rf $local_chroot_dir/${TMP_REMASTER_DIR}
 
     # iso_post
     REMASTER_STAGE=${ISO_POST_CMD_DIR}
@@ -193,13 +192,10 @@ function run_remaster_commands {
         \rm -rf $local_iso_dir/${TMP_REMASTER_DIR}/commands
     fi
     local_src_dir=${local_remaster_cmds_dir}/${REMASTER_STAGE}
-    if [ -d $local_src_dir ]; then
-        sudo mkdir -p  $local_iso_dir/${TMP_REMASTER_DIR}
-        sudo \cp -af ${local_src_dir}/. $local_iso_dir/${TMP_REMASTER_DIR}/.
-        \cp -f ${PROG_DIR}/__remaster_toplevel.sh $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD}
-        REMASTER_STAGE=$REMASTER_STAGE $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD} 2>&1 | tee -a $local_remaster_log
-        \rm -rf $local_iso_dir/${TMP_REMASTER_DIR}
-    fi
+    sudo \cp -af ${local_src_dir}/. $local_iso_dir/${TMP_REMASTER_DIR}/.
+    \cp -f ${PROG_DIR}/__remaster_toplevel.sh $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD}
+    REMASTER_STAGE=$REMASTER_STAGE $local_iso_dir/${TMP_REMASTER_DIR}/${TOP_CMD} 2>&1 | tee -a $local_remaster_log
+    \rm -rf $local_iso_dir/${TMP_REMASTER_DIR}
 
     # copy log to /root/remaster
     mkdir -p $local_chroot_dir/root/remaster
