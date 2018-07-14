@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import sys
-import os
-import re
-import subprocess
-import isoparser
+sys.dont_write_bytecode = True
+import os  # noqa: E402
+import re  # noqa: E402
+import subprocess  # noqa: E402
+import isoparser  # noqa: E402
 
 
 class ISOParserExt(object):
@@ -82,6 +83,55 @@ class ISOParserExt(object):
             pass
         return ret
 
+    @property
+    def volid(self):
+        cmd = 'isoinfo -d -i "%s"' % (self.iso_path,)
+        l = subprocess.check_output(cmd, shell=True).splitlines()
+        l = [x for x in l if x.startswith('Volume id: ')]
+        if l:
+            l = l[0]
+            return l.split(':')[1].strip()
+        return ''
+
+    @property
+    def grub_cfg_path(self):
+        cmd = 'isoinfo -R -i "%s" -f' % (self.iso_path,)
+        l = subprocess.check_output(cmd, shell=True).splitlines()
+        l = [x for x in l if x.endswith('grub.cfg')]
+        if l:
+            return l[0]
+        return ''
+
+    @property
+    def grub_cfg_contents(self):
+        if not self.grub_cfg_path:
+            return ''
+        cmd = 'isoinfo -R -i "%s" -x %s' % (self.iso_path, self.grub_cfg_path)
+        return subprocess.check_output(cmd, shell=True)
+
+    @property
+    def uefi64(self):
+        cmd = 'isoinfo -R -i "%s" -f' % (self.iso_path,)
+        lines = subprocess.check_output(cmd, shell=True).splitlines()
+        pat = 'bootx64.efi'
+        for l in lines:
+            m = re.search(pat, l, re.IGNORECASE)
+            if m:
+                return l
+        return ''
+
+    @property
+    def uefi32(self):
+        cmd = 'isoinfo -R -i "%s" -f' % (self.iso_path,)
+        lines = subprocess.check_output(cmd, shell=True).splitlines()
+        pat = 'bootia32.efi'
+        for l in lines:
+            l = l.rstrip()
+            m = re.search(pat, l, re.IGNORECASE)
+            if m:
+                return l
+        return ''
+
 
 def get_distro(iso_path):
     '''
@@ -129,7 +179,7 @@ def get_distro(iso_path):
     except:
         pass
 
-    # trisquel
+    # elementaryOS
     '''
     info in /.disk/info starts with 'elementary OS '
     '''
@@ -162,6 +212,62 @@ def get_distro(iso_path):
         if x.name.startswith('puppy_') and x.name.endswith('.sfs'):
             return('puppy')
 
+    # ARCH
+    if iso.has_dirpath('/arch'):
+        return('arch')
+
+    # Manjaro (ARCH-derivative)
+    if iso.has_dirpath('/manjaro'):
+        return('manjaro')
+
+    # Gentoo
+    if iso.has_filepath('/boot/gentoo'):
+        return 'gentoo'
+
+    # Centos
+    # Centos has NO indicator - no .disk/info no dir name
+    # We try to check prefix of VolID else read informational
+    # message in /isolinux/isolinux.cfg !
+    if iso.volid.startswith('CentOS'):
+        return 'centos'
+
+    if iso.has_filepath('/isolinux.isolinux.cfg'):
+        s = iso.record('isolinux', 'isolinux.cfg').content
+        l = [x for x in s.splitlines() if x.startswith(
+            'menu autoboot Starting Centos')]
+        if l:
+            return 'centos'
+
+    # Fedora
+    # Fedora has NO indicator - no .disk/info no dir name
+    # We try to check prefix of VolID else read informational
+    # message in /isolinux/isolinux.cfg !
+    if iso.volid.startswith('Fedora'):
+        return 'fedora'
+
+    if iso.has_filepath('/isolinux.isolinux.cfg'):
+        s = iso.record('isolinux', 'isolinux.cfg').content
+        l = [x for x in s.splitlines() if x.startswith(
+            'menu title Fedora')]
+        if l:
+            return 'fedora'
+
+    # openSuse
+    # openSuse has NO indicator - no .disk/info no dir name
+    # We try to check prefix of VolID
+    if iso.volid.startswith('openSUSE'):
+        return 'opensuse'
+
+    # Antergos (ARCH-derivative)
+    # Antergos has NO indicator - no .disk/info no dir name
+    # We try to check prefix of VolID
+    if iso.volid.lower().startswith('antergos'):
+        return 'antergos'
+
+    # Sabayon (Gentoo-derivative)
+    if iso.has_filepath('/boot/sabayon'):
+        return 'sabayon'
+
     # Generic
     return('generic')
 
@@ -181,6 +287,14 @@ def get_instance(iso_path):
         'elementaryOS': ElementaryOSISO,
         'tinycore': TinyCoreISO,
         'puppy': PuppyISO,
+        'arch': ArchLinuxISO,
+        'gentoo': GentooISO,
+        'centos': CentosISO,
+        'fedora': FedoraISO,
+        'opensuse': OpenSuseISO,
+        'manjaro': ManjaroISO,
+        'antergos': AntergosISO,
+        'sabayon': SabayonISO,
         'generic': GenericLinuxISO
     }
     distro = get_distro(iso_path)
@@ -192,12 +306,6 @@ def get_instance(iso_path):
 class LinuxISO(object):
     '''
     Uses isoparser to identify the distro of a Linux ISO
-    For each distribution I hope to support:
-        Booting 32-bit or 64-bit ISO on 64-bit hardware
-        Booting 32-bit ISO on 32-bit hardware
-        Boot ISO whether or not ISO is intrinsically EFI-aware
-        Boot on EFI and non-EFI machines
-        Boot on EFI machines with 64-bit hardware and 32-bit EFI loader
 
     Distributions supported:
         - Ubuntu, official flavours
@@ -209,31 +317,32 @@ class LinuxISO(object):
         - GRML - including combined 32-bit and 64-bit:
             - Daily builds work
             - Older builds work also
+        - Knoppix : Currently only tested OLD Knoppix
+        - Arch
+        - Gentoo
+        - Fedora
+        - Centos
+        - openSuse
+        - Manjaro (Arch-derivative)
+        - Antergos (Arch-derivative)
+        - Sabayon (Gentoo-derivative)
+        - PuppyLinux
+        - Tinycore - only works on non-EFI older machines
 
-    Distros to be eventually targeted:
-        Knoppix :
-            Currently only tested OLD Knoppix
-            Only works on non-EFI older machines
-        Arch
-        Fedora
-        Gentoo
-        Centos
+    Distros to be eventually supported:
         Red Hat
-        Open Suse
-
-        Manjaro (Arch-derivative)
-        Antergos (Arch-derivative)
-        Sabayon (Arch-derivative)
         KaliLinux (Debian-derivative)
         TailsOS (Debian-derivative)
         BackBox (Ubuntu-derivative)
         Parrot (Debian-derivative)
-        Tinycore - only works on non-EFI older machines
-        PuppyLinux
     '''
     KNOWN_DISTROS = [
         'ubuntu', 'debian', 'knoppix', 'grml', 'linuxmint',
-        'tinycore', 'puppy', 'generic'
+        'trisquel', 'elementaryOS',
+        'tinycore', 'puppy',
+        'arch', 'gentoo', 'centos', 'fedora', 'opensuse'
+        'manjaro', 'antergos', 'sabayon'
+        'generic'
     ]
 
     def __init__(self, iso_path, distro='generic'):
@@ -266,16 +375,12 @@ class LinuxISO(object):
                 'remaster', 'remaster.time').content.splitlines()[0]
         except:
             pass
-        self.volid = ''
-        try:
-            cmd = 'isoinfo -d -i "%s"' % (self.iso_path,)
-            l = subprocess.check_output(cmd, shell=True).splitlines()
-            l = [x for x in l if x.startswith('Volume id: ')]
-            if l:
-                l = l[0]
-                self.volid = l.split(':')[1].strip()
-        except:
-            pass
+        self.volid = self._iso.volid
+        self.grub_cfg_path = self._iso.grub_cfg_path
+        self.grub_cfg_contents = self._iso.grub_cfg_contents
+        self.uefi64 = self._iso.uefi64
+        self.uefi32 = self._iso.uefi32
+
         if self.remaster_time and self.volid:
             self.friendly_name = 'Remastered [%s] %s' % (
                 self.remaster_time, self.volid)
@@ -423,6 +528,83 @@ class PuppyISO(DebianISO):
         return ret
 
 
+class ArchLinuxISO(LinuxISO):
+    def set_details(self):
+        self.distro_type = 'arch'
+        self.distro_subtype = 'arch'
+
+
+class ManjaroISO(ArchLinuxISO):
+    def set_details(self):
+        ArchLinuxISO.set_details(self)
+        self.distro_subtype = 'manjaro'
+
+
+class AntergosISO(ArchLinuxISO):
+    def set_details(self):
+        ArchLinuxISO.set_details(self)
+        self.distro_subtype = 'antergos'
+
+
+class GentooISO(LinuxISO):
+    def set_details(self):
+        self.distro_type = 'gentoo'
+        self.distro_subtype = 'gentoo'
+
+
+class SabayonISO(GentooISO):
+    def set_details(self):
+        GentooISO.set_details(self)
+        self.distro_subtype = 'sabayon'
+
+
+class CentosISO(LinuxISO):
+    def set_details(self):
+        self.distro_type = 'centos'
+        self.distro_subtype = 'centos'
+        if self._iso.has_filepath('/isolinux/isolinux.cfg'):
+            s = self._iso.record('isolinux', 'isolinux.cfg').content
+            l = [x for x in s.splitlines() if x.startswith(
+                'menu autoboot Starting Centos')]
+            if l:
+                l = l[0]
+                pat = '^menu autoboot Starting (?P<friendly>.*?) in # second'
+                m = re.match(pat, l)
+                if m:
+                    self.friendly_name = '%s (%s)' % (
+                        m.groupdict()['friendly'],
+                        self.friendly_name
+                    )
+
+
+class FedoraISO(LinuxISO):
+    def set_details(self):
+        self.distro_type = 'fedora'
+        self.distro_subtype = 'fedora'
+        if self._iso.has_filepath('/isolinux/isolinux.cfg'):
+            s = self._iso.record('isolinux', 'isolinux.cfg').content
+            l = [x for x in s.splitlines() if x.startswith(
+                'menu title Fedora')]
+            if l:
+                l = l[0]
+                pat = '^menu title (?P<friendly>.*)$'
+                m = re.match(pat, l)
+                if m:
+                    self.friendly_name = '%s (%s)' % (
+                        m.groupdict()['friendly'],
+                        self.friendly_name
+                    )
+
+
+class OpenSuseISO(LinuxISO):
+    def set_details(self):
+        self.distro_type = 'opensuse'
+        if self._iso.volid.startswith('openSUSE_Tumbleweed'):
+            self.distro_subtype = 'tumbleweed'
+        else:
+            self.distro_subtype = 'opensuse'
+
+
 class GenericLinuxISO(LinuxISO):
     pass
 
@@ -437,9 +619,14 @@ if __name__ == '__main__':
     c = get_instance(iso_path)
     print('%s:' % (os.path.basename(iso_path), ))
     print('    Distro: %s' % (c.distro,))
+    print('    Distro type: %s' % (c.distro_type,))
+    print('    Distro subtype: %s' % (c.distro_subtype,))
     print('    Friendly name: %s' % (c.friendly_name,))
     print('    Remaster info: %s' % (c.remaster_info,))
     print('    VolID: %s' % (c.volid,))
+    print('    grub.cfg: %s' % (c.grub_cfg_path,))
+    print('    64-bit EFI: %s' % (c.uefi64,))
+    print('    32-bit EFI: %s' % (c.uefi32,))
     try:
         print('    BootID: %s' % (c.bootid,))
     except:

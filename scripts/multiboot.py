@@ -28,9 +28,11 @@ References:
     http://git.marmotte.net/git/glim/tree/grub2
 
 '''
-import os
-import re
-from linuxiso import get_instance
+import sys
+sys.dont_write_bytecode = True
+import os  # noqa: E402
+import re  # noqa: E402
+from linuxiso import get_instance  # noqa: E402
 
 
 class ISOBootEntry(object):
@@ -127,7 +129,19 @@ submenu "%s" {
     set gfxpayload=keep
     linux /live/vmlinuz boot=live components findiso=$isofile noeject quiet splash
     initrd /live/initrd.img
-'''
+    '''  # noqa: E501
+        return self.menuentry_template % (
+            self.iso.friendly_name,
+            self.common,
+            ending
+        )
+
+    @property
+    def gentoo_menu(self):
+        ending = '''
+        linux (loop)/isolinux/gentoo root=/dev/ram0 init=/linuxrc dokeymap aufs looptype=squashfs loop=/image.squashfs cdroot initrd=gentoo.igz isoboot=$isofile
+        initrd (loop)/isolinux/gentoo.igz
+        '''  # noqa: E501
         return self.menuentry_template % (
             self.iso.friendly_name,
             self.common,
@@ -136,11 +150,17 @@ submenu "%s" {
 
     @property
     def unknown_distro_menu(self):
-        ending = '''
+        # Just try chainloading
+        '''
+        ending = '
 echo "Do not know how to handle this type of distribution"
 echo "Distro: %s"
 read a
-''' % (self.iso.distro,)
+' % (self.iso.distro,)
+        '''
+        ending = '''
+    chainloader +1
+'''
         return self.menuentry_template % (
             self.iso.friendly_name,
             self.common,
@@ -157,6 +177,10 @@ read a
             return self.grml_menu
         elif self.iso.distro == 'debian':
             return self.debian_menu
+        elif self.iso.distro == 'gentoo':
+            return self.gentoo_menu
+        elif self.iso.distro == 'sabayon':
+            return self.gentoo_menu
         else:    # distros we don't know how to handle
             return self.unknown_distro_menu
 
@@ -239,6 +263,7 @@ load_video
 ''']
 
         for iso in self.get_iso_files():
+            print('processing %s' % (os.path.basename(iso),))
             be = ISOBootEntry(iso, '/iso')
             ml += [be.menuentry]
         ml += ['''
@@ -256,10 +281,7 @@ menuentry "Power down - may not always work" {
 
     def write(self):
         m = self.menu
-        print(m)
         if self.cfg_file:
             with open(self.cfg_file, 'w') as f:
                 f.write(m)
                 f.flush()
-        else:
-            print(m)
