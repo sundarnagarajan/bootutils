@@ -57,7 +57,12 @@ do
     fi
     echo "$(basename $CMD) ${STAGE}: Starting"
     $CMD 2>&1 | sed -u -e 's/^/    /'
-    if [ $? -ne 0 ]; then
+    # Special case if return code is 255, bail out of remaster
+    ret=$?
+    if [ $ret -eq 255 ]; then
+        echo "$(basename $CMD) ${STAGE}: Failed - exiting remaster script"
+        exit 1
+    elif [ $ret -ne 0 ]; then
         echo "$(basename $CMD) ${STAGE}: Non-zero return code"
     fi
     echo "$(basename $CMD) ${STAGE}: Completed"
