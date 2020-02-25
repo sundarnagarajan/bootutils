@@ -23,7 +23,7 @@ fi
 
 COMMANDS_DIR=${PROG_DIR}/commands
 if [ ! -d $COMMANDS_DIR ]; then
-    echo "${PROG_NAME}: COMMANDS_DIR not a directory: $COMMANDS_DIR ${STAGE}"
+    echo "${PROG_NAME}: Not a directory: $COMMANDS_DIR ${STAGE}"
     exit 0
 fi
 COMMANDS_DIR=$(readlink -e $COMMANDS_DIR)
@@ -31,14 +31,14 @@ COMMANDS_DIR=$(readlink -e $COMMANDS_DIR)
 if [ -f ${COMMANDS_DIR}/commands.list ]; then
     CMD_LIST=$(cat ${COMMANDS_DIR}/command.list)
     if [ -z "$CMD_LIST" ]; then 
-        echo "${PROG_NAME}: Empty commands.list. Ignoring commands in $COMMANDS_DIR ${STAGE}"
+        echo "${PROG_NAME}: Empty commands.list. Ignoring commands in COMMANDS_DIR ${STAGE}"
         exit 0
     fi
-    echo "${PROG_NAME}: Only running specified commands in commands.list"
+    echo "${PROG_NAME}: Only running specified commands in commands.list ${STAGE}"
 else
     CMD_LIST=$(ls ${COMMANDS_DIR})
     if [ -z "$CMD_LIST" ]; then
-        echo "${PROG_NAME}: No commands found in $COMMANDS_DIR ${STAGE}"
+        echo "${PROG_NAME}: No commands found: ${STAGE}"
         exit 0
     fi
 fi
