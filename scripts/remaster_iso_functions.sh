@@ -263,7 +263,7 @@ function update_iso {
     fi
     local_output_iso="$(basename $local_output_iso)"
     local_output_iso="$local_output_iso_dir/$local_output_iso"
-    local local_volid=$(get_vol_id "${local_orig_iso}")
+    local local_src_volid=$(get_vol_id "${local_orig_iso}")
     local local_efi_img=""
     if [ -f ${local_iso_dir}/$4 ]; then
         local_efi_img="$4"
@@ -291,7 +291,7 @@ function update_iso {
         sudo xorriso -as mkisofs \
             -iso-level 3 \
             -full-iso9660-filenames \
-            -volid "${local_volid}" \
+            -volid "${local_src_volid}" \
             -isohybrid-mbr ../isohdpfx.bin \
             -c isolinux/boot.cat \
             -b isolinux/isolinux.bin -no-emul-boot \
@@ -305,7 +305,7 @@ function update_iso {
         sudo xorriso -as mkisofs \
             -iso-level 3 \
             -full-iso9660-filenames \
-            -volid "${local_volid}" \
+            -volid "${local_src_volid}" \
             -isohybrid-mbr ../isohdpfx.bin \
             -c isolinux/boot.cat \
             -b isolinux/isolinux.bin -no-emul-boot \
@@ -314,19 +314,30 @@ function update_iso {
             -o "${local_output_iso}" \
             . 1>/dev/null 2>&1
     fi
+    local xorriso_ret=$?
     cd "${local_extract_dir}"
     sudo rm -f isohdpfx.bin
     sudo rm -rf "${local_iso_dir}"
+    if [ $xorriso_ret -ne 0 ]; then
+        echo "xorriso failed"
+    fi
+    if [ $xorriso_ret -eq 0 ]; then
+        local local_out_volid=$(get_vol_id "${local_output_iso}")
 
+        echo ""
+        echo "--------------------------------------------------------------------------"
+        echo "Source ISO=$local_orig_iso"
+        echo "Output ISO=$local_output_iso"
+        echo "Source VolID=$local_src_volid"
+        echo "Output VolID=$local_out_volid"
+        echo ""
+        echo "--------------------------------------------------------------------------"
+        echo ""
+    fi
     echo "(update_iso): Completed"
     cd $old_dir
-    echo ""
-    echo "--------------------------------------------------------------------------"
-    echo "Source ISO=$local_orig_iso"
-    echo "Output ISO=$local_output_iso"
-    echo "VolID=$local_volid"
-    echo ""
-    echo "--------------------------------------------------------------------------"
-    echo ""
+    if [ $xorriso_ret -ne 0 ]; then
+        return $xorriso_ret
+    fi
     return 0
 }
