@@ -10,6 +10,45 @@
 # commands.list
 #
 # commands.list is NEVER executed, even if present and executable
+#
+# TODOs
+#   1. IGNORE user command filenames that start with underscore
+#   2. Create __remaster_toplevel_functions.sh with common functions
+#   3. Copy __remaster_toplevel_functions.sh to same dir as
+#      __remaster_toplevel.sh in run_remaster_commands function
+#      in __remaster_toplevel_functions.sh
+#
+#   4. Use common functions in user scripts:
+#       a. initialize
+#          Setup /etc/resolv.conf and create /etc/resolv.conf.remaster_orig
+#       b. check_pkg_integrity
+#       c. install_if_missing
+#          Install list of packages permanently in chroot
+#          use check_pkg_integrity  
+#       d. install_pkgs_temporary
+#          Install list of packages, but mark them to be removed
+#          at the end of chroot commands
+#          use check_pkg_integrity  
+#       e. run_cmd_if_available
+#       f. run_cmd_or_exit
+#          Exits from script if command is UNAVAILABLE
+#       g. run_cmd_or_fail
+#          Exits remastering processif command is UNAVAILABLE
+#       h. require_dir_or_exit
+#       i. require_file_or_exit
+#       j. require_dir_or_fail
+#       k. require_file_or_fail
+
+#   5. Create new automatic (non-user) commands
+#       a. __apt_update
+#          run apt-update - need to do only once in chroot
+#       b. __remove_temporary_packages - at the end of chroot commands
+#   6. Change __remaster_toplevel.sh to:
+#       a. Run __apt_update BEFORE any user commands
+#       b. Run __remove_temporary_packages AFTER ALL user commands
+#   7. Change user commands
+#       a. Add xx_install_packages - at the start - use install_if_missing
+
 
 PROG_PATH=${PROG_PATH:-$(readlink -e $0)}
 PROG_DIR=${PROG_DIR:-$(dirname ${PROG_PATH})}
