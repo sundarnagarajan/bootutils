@@ -14,6 +14,8 @@
 # TODOs
 #   1. IGNORE user command filenames that start with underscore
 #   2. Create __remaster_toplevel_functions.sh with common functions
+#      Export functions using 'export -f <fn_name>'
+#      See: https://unix.stackexchange.com/a/22867
 #   3. Copy __remaster_toplevel_functions.sh to same dir as
 #      __remaster_toplevel.sh in run_remaster_commands function
 #      in __remaster_toplevel_functions.sh
