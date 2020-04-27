@@ -6,7 +6,11 @@ PROG_PATH=${PROG_PATH:-$(readlink -e $0)}
 PROG_DIR=$(dirname ${PROG_PATH})
 PROG_NAME=$(basename ${PROG_PATH})
 
-. "${PROG_DIR}"/remaster_iso_functions.sh
+if [ -f "${PROG_DIR}"/remaster_iso_functions.sh ]; then
+    source "${PROG_DIR}"/remaster_iso_functions.sh
+else
+    source remaster_iso_functions.sh    # current dir
+fi
 
 # Needs root privileges (to mount)
 exit_if_not_root
