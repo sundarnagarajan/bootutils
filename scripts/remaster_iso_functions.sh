@@ -246,98 +246,119 @@ function update_squashfs {
     return 0
 }
 
+
 function update_iso {
     # $1: ISO_EXTRACT_DIR: Dir containing extracted ISO
     # $2: OUTPUT_ISO:      Full path to output ISO - will be created / overwritten
     # $3: OLD_ISO_PATH:    Full path to ORIGINAL ISO to extract isohdpfx.bin and VOLID
     # $4: EFI_IMG_FILE:    Relative path to efi.img under ISO_EXTRACT_SUBDIR
+    #
+    # See: https://askubuntu.com/q/1289400
+    # See: https://wiki.debian.org/RepackBootableISO#What_to_do_if_no_file_.2F.disk.2Fmkisofs_exists
 
-    local local_extract_dir=$(readlink -e "$1")
-    local local_output_iso="$2"
-    local local_orig_iso=$(readlink -e "$3")
-    local local_iso_dir=${local_extract_dir}/"${ISO_EXTRACT_SUBDIR}"
+    [[ $# -lt 4 ]] && return 1
+    local extract_dir=$(readlink -e "$1")
+    local output_iso=$(readlink -f "$2")
+    local input_iso=$(readlink -e "$3")
+    local img_extract_dir=$(mktemp -d -p /tmp)
+    local volid=$(get_vol_id "${input_iso}")
 
-    local local_output_iso_dir=$(readlink -e $(dirname "$local_output_iso"))
-    if [ -z "$local_output_iso_dir" ]; then
-        local_output_iso_dir=.
-    fi
-    local_output_iso="$(basename $local_output_iso)"
-    local_output_iso="$local_output_iso_dir/$local_output_iso"
-    local local_src_volid=$(get_vol_id "${local_orig_iso}")
-    local local_efi_img=""
-    if [ -f ${local_iso_dir}/$4 ]; then
-        local_efi_img="$4"
-    fi
+    extract_dir=${extract_dir}/"${ISO_EXTRACT_SUBDIR}"
+    # check params here
 
-    local old_dir=$(pwd)
-    cd "$local_extract_dir"
+    local mbr_image="${img_extract_dir}/mbr_image"
+    local isohdpfx="${img_extract_dir}/isohdpfx.bin"
+    local boot_image=""
+    local catalog=""
+    local efi_image="${img_extract_dir}/efi_image"
+
+    sudo -n rm -f "$mbr_image" "$efi_image" "$boot_image" "$catalog" "$isohdpfx"
 
     # Update remaster.time
-    sudo mkdir -p "${local_iso_dir}"/${REMASTER_DIR}
-    sudo echo "$(date '+%Y-%m-%d-%H%M%S')" > "${local_iso_dir}"/${REMASTER_DIR}/remaster.time
-    sudo echo "Remastered from $(basename $local_orig_iso)" > "${local_iso_dir}"/${REMASTER_DIR}/remaster.txt
-
-    # create the iso
-    sudo rm -f "$local_output_iso}"
-    sudo rm -f isohdpfx.bin
-    sudo dd if="${local_orig_iso}" bs=512 count=1 of=isohdpfx.bin > /dev/null 2>&1
-    cd "${local_iso_dir}"
+    sudo -n mkdir -p "${extract_dir}"/${REMASTER_DIR}
+    sudo -n echo "$(date '+%Y-%m-%d-%H%M%S')" > "${extract_dir}"/${REMASTER_DIR}/remaster.time
+    sudo -n echo "Remastered from $(basename $input_iso)" > "${extract_dir}"/${REMASTER_DIR}/remaster.txt
 
 
-    echo "(update_iso): Creating ISO ... $local_output_iso"
-    # From https://askubuntu.com/a/625289
-    if [ -n "$local_efi_img" ]; then
-        echo "(update_iso): Creating MBR- and EFI-compatible ISO"
-        sudo xorriso -as mkisofs \
-            -iso-level 3 \
-            -full-iso9660-filenames \
-            -volid "${local_src_volid}" \
-            -isohybrid-mbr ../isohdpfx.bin \
-            -c isolinux/boot.cat \
-            -b isolinux/isolinux.bin -no-emul-boot \
-            -boot-load-size 4 -boot-info-table \
-            -eltorito-alt-boot -e "$local_efi_img" -no-emul-boot \
-            -isohybrid-gpt-basdat \
-            -o "${local_output_iso}" \
-            . 1>/dev/null 2>&1
+    # Groovy (onwards), Ubuntu has moved away from isolinux
+    # and has EFI as a separate PARTITION on the ISO
+
+    local EFI_ISO=no
+    fdisk -l "$input_iso" | grep -q 'EFI System$' && EFI_ISO=yes
+
+    if [[ "$EFI_ISO" = "yes" ]]; then
+        # GPT ISO with EFI partition
+
+        boot_image="/boot/grub/i386-pc/eltorito.img"
+        catalog="/boot.catalog"
+        # MBR image
+        sudo -n dd if="$input_iso" bs=1 count=446 of="$mbr_image" 1>/dev/null 2>&1
+        # EFI image
+        # local skip=$(/sbin/fdisk -l "$input_iso" | fgrep '.iso2 ' | awk '{print $2}')
+        # local size=$(/sbin/fdisk -l "$input_iso" | fgrep '.iso2 ' | awk '{print $4}')
+        # sudo -n dd if="$input_iso" bs=512 skip="$skip" count="$size" of="$efi_image" 1>/dev/null 2>&1
+        rm -f "$efi_image"
+        mv "$extract_dir"/boot/grub/efi.img "$efi_image"
     else
-        echo "(update_iso): Creating MBR-only ISO"
-        sudo xorriso -as mkisofs \
-            -iso-level 3 \
-            -full-iso9660-filenames \
-            -volid "${local_src_volid}" \
-            -isohybrid-mbr ../isohdpfx.bin \
-            -c isolinux/boot.cat \
-            -b isolinux/isolinux.bin -no-emul-boot \
-            -boot-load-size 4 -boot-info-table \
+        boot_image="/isolinux/isolinux.bin"
+        catalog="/isolinux/boot.cat"
+        # isohdpfx - first 432 bytes of input_iso
+        sudo -n dd if="$input_iso" bs=1 count=432 of="$isohdpfx" 1>/dev/null 2>&1
+
+        # EFI image
+        cp "$extract_dir"/boot/grub/efi.img "$efi_image"
+        # efi_image="/boot/grub/efi.img"
+    fi
+
+    if [[ "$EFI_ISO" = "yes" ]]; then
+
+        #    -isohybrid-gpt-basdat \
+        sudo -n xorriso -as mkisofs \
+            -quiet \
+            -r -J -joliet-long -l -iso-level 3 -full-iso9660-filenames \
+            -partition_offset 16 \
+            --grub2-mbr "$mbr_image" \
+            --mbr-force-bootable \
+            -append_partition 2 0xEF "$efi_image" \
+            -appended_part_as_gpt \
+            -c "$catalog" \
+            -b "$boot_image" -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info \
+            -eltorito-alt-boot -e '--interval:appended_partition_2:all::' -no-emul-boot \
+            -volid "${volid}" \
+            -o "$output_iso" \
+            "$extract_dir" 1>/dev/null 2>&1
+    else
+        sudo -n xorriso -as mkisofs \
+            -quiet \
+            -r -J -joliet-long -iso-level 3 -full-iso9660-filenames \
+            -volid "${volid}" \
+            -isohybrid-mbr "$isohdpfx" \
+            -c "$catalog" \
+            -b "$boot_image" -no-emul-boot -boot-load-size 4 -boot-info-table \
+            -eltorito-alt-boot -e "$efi_image" -no-emul-boot \
             -isohybrid-gpt-basdat \
-            -o "${local_output_iso}" \
-            . 1>/dev/null 2>&1
+            -o "${output_iso}" \
+            "$extract_dir" 1>/dev/null 2>&1
     fi
     local xorriso_ret=$?
-    cd "${local_extract_dir}"
-    sudo rm -f isohdpfx.bin
-    sudo rm -rf "${local_iso_dir}"
+    sudo rm -rf "$img_extract_dir"
+    sudo rm -rf "${extract_dir}"
     if [ $xorriso_ret -ne 0 ]; then
         echo "xorriso failed"
     fi
     if [ $xorriso_ret -eq 0 ]; then
-        local local_out_volid=$(get_vol_id "${local_output_iso}")
+        local out_volid=$(get_vol_id "${output_iso}")
 
         echo ""
         echo "--------------------------------------------------------------------------"
-        echo "Source ISO=$local_orig_iso"
-        echo "Output ISO=$local_output_iso"
-        echo "Source VolID=$local_src_volid"
-        echo "Output VolID=$local_out_volid"
+        echo "Source ISO=$input_iso"
+        echo "Output ISO=$output_iso"
+        echo "Source VolID=$volid"
+        echo "Output VolID=$out_volid"
         echo ""
         echo "--------------------------------------------------------------------------"
         echo ""
     fi
     echo "(update_iso): Completed"
-    cd $old_dir
-    if [ $xorriso_ret -ne 0 ]; then
-        return $xorriso_ret
-    fi
-    return 0
+    return $xorriso_ret
 }

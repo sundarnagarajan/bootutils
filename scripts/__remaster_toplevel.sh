@@ -55,6 +55,7 @@
 PROG_PATH=${PROG_PATH:-$(readlink -e $0)}
 PROG_DIR=${PROG_DIR:-$(dirname ${PROG_PATH})}
 PROG_NAME=${PROG_NAME:-$(basename ${PROG_PATH})}
+FAILED_EXIT_CODE=127
 
 if [ -n "$REMASTER_STAGE" ]; then
     STAGE="[$REMASTER_STAGE]"
@@ -98,9 +99,9 @@ do
     fi
     echo "$(basename $CMD) ${STAGE}: Starting"
     $CMD 2>&1 | sed -u -e 's/^/    /'
-    # Special case if return code is 255, bail out of remaster
+    # Special case if return code is $FAILED_EXIT_CODE, bail out of remaster
     ret=$?
-    if [ $ret -eq 255 ]; then
+    if [ $ret -eq $FAILED_EXIT_CODE ]; then
         echo "$(basename $CMD) ${STAGE}: Failed - exiting remaster script"
         exit 1
     elif [ $ret -ne 0 ]; then
