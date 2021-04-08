@@ -1,0 +1,9 @@
+#!/bin/bash
+PROG_DIR=$(dirname "$BASH_SOURCE")
+PROG_DIR=$(readlink -e "$PROG_DIR")
+
+source "$PROG_DIR"/disk_partition_functions.sh || {
+    >&2 echo "Could not source: $PROG_DIR/disk_partition_functions.sh"
+    exit 1
+}
+show_all_disk_partitions
