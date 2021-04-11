@@ -280,7 +280,7 @@ function choose_efi_partition(){
     fi
 
     available=yes
-    show_disks
+    >&2 echo "$(show_disks)"
     >&2 echo ""
     >&2 echo ""
     >&2 echo -e "$p_out"
@@ -333,7 +333,7 @@ function choose_grub_partition(){
     fi
 
     available=yes
-    show_disks
+    >&2 echo "$(show_disks)"
     >&2 echo ""
     >&2 echo ""
     >&2 echo -e "$p_out"
