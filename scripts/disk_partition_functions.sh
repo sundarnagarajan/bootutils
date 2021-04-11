@@ -228,20 +228,20 @@ function show_grub_partitions(){
     local p_out=$(show_all_disk_partitions)
     local heading=$(echo "$p_out" | head -1)
     local list=$(echo "$p_out" | sed -e '1d')
-    local efi_out=""
+    local grub_out=""
 
     while read line
     do
         local p=$(echo "$line" | awk '{print $1}')
         valid_grub_partition "$p" || continue
-        [[ -n "$efi_out" ]] && {
+        [[ -n "$grub_out" ]] && {
             line="\n${line}"
         }
-        efi_out="${efi_out}${line}"
+        grub_out="${grub_out}${line}"
     done <<< $list
-    if [[ -n "$efi_out" ]]; then
+    if [[ -n "$grub_out" ]]; then
         echo -e "$heading"
-        echo -e "$efi_out"
+        echo -e "$grub_out"
     fi
 }
 
@@ -280,8 +280,11 @@ function choose_efi_partition(){
     fi
 
     available=yes
-    echo -e"$p_out"
-    echo""
+    show_disks
+    >&2 echo ""
+    >&2 echo ""
+    >&2 echo -e "$p_out"
+    >&2 echo ""
 
     while [[ -z "$ret" ]];
     do
@@ -330,8 +333,11 @@ function choose_grub_partition(){
     fi
 
     available=yes
-    echo -e"$p_out"
-    echo""
+    show_disks
+    >&2 echo ""
+    >&2 echo ""
+    >&2 echo -e "$p_out"
+    >&2 echo ""
 
     while [[ -z "$ret" ]];
     do
