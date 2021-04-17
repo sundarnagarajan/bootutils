@@ -301,6 +301,8 @@ function update_iso {
     else
         boot_image="/isolinux/isolinux.bin"
         catalog="/isolinux/boot.cat"
+        # MBR image
+        sudo -n dd if="$input_iso" bs=1 count=446 of="$mbr_image" 1>/dev/null 2>&1
         # isohdpfx - first 432 bytes of input_iso
         sudo -n dd if="$input_iso" bs=1 count=432 of="$isohdpfx" 1>/dev/null 2>&1
 
