@@ -288,7 +288,6 @@ function update_iso {
 
     if [[ "$EFI_ISO" = "yes" ]]; then
         # GPT ISO with EFI partition
-
         boot_image="/boot/grub/i386-pc/eltorito.img"
         catalog="/boot.catalog"
         # MBR image
@@ -311,8 +310,6 @@ function update_iso {
     fi
 
     if [[ "$EFI_ISO" = "yes" ]]; then
-
-        #    -isohybrid-gpt-basdat \
         sudo -n xorriso -as mkisofs \
             -quiet \
             -r -J -joliet-long -l -iso-level 3 -full-iso9660-filenames \
@@ -338,7 +335,7 @@ function update_iso {
             -eltorito-alt-boot -e "$efi_image" -no-emul-boot \
             -isohybrid-gpt-basdat \
             -o "${output_iso}" \
-            "$extract_dir" 1>/dev/null 2>&1
+            "$extract_dir"
     fi
     local xorriso_ret=$?
     sudo rm -rf "$img_extract_dir"
