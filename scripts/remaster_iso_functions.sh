@@ -309,7 +309,7 @@ function update_iso {
         # efi_image="/boot/grub/efi.img"
     fi
 
-    # TRY ALWAYS creating ISO with separate EFI partition
+    # DEBUG: TRY ALWAYS creating ISO with separate EFI partition
     EFI_ISO=yes
 
     if [[ "$EFI_ISO" = "yes" ]]; then
