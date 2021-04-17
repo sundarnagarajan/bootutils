@@ -326,7 +326,7 @@ function update_iso {
             -eltorito-alt-boot -e '--interval:appended_partition_2:all::' -no-emul-boot \
             -volid "${volid}" \
             -o "$output_iso" \
-            "$extract_dir" 1>/dev/null 2>&1
+            "$extract_dir"
     else
         sudo -n xorriso -as mkisofs \
             -quiet \
