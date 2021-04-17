@@ -311,8 +311,9 @@ function update_iso {
         # efi_image="/boot/grub/efi.img"
     fi
 
-    # DEBUG: TRY ALWAYS creating ISO with separate EFI partition
-    EFI_ISO=yes
+    # ALWAYS create ISO with separate EFI partition
+    # EFI (including ia32) works, MBR does not
+    # EFI_ISO=yes
 
     if [[ "$EFI_ISO" = "yes" ]]; then
         sudo -n xorriso -as mkisofs \
@@ -330,6 +331,7 @@ function update_iso {
             -o "$output_iso" \
             "$extract_dir"
     else
+        junk='
         sudo -n xorriso -as mkisofs \
             -quiet \
             -r -J -joliet-long -iso-level 3 -full-iso9660-filenames \
@@ -340,6 +342,22 @@ function update_iso {
             -eltorito-alt-boot -e "$efi_image" -no-emul-boot \
             -isohybrid-gpt-basdat \
             -o "${output_iso}" \
+            "$extract_dir"
+        '
+        sudo -n xorriso -as mkisofs \
+            -quiet \
+            -r -J -joliet-long -l -iso-level 3 -full-iso9660-filenames \
+            -partition_offset 16 \
+            -isohybrid-mbr "$isohdpfx" \
+            --mbr-force-bootable \
+            -append_partition 2 0xEF "$efi_image" \
+            -appended_part_as_gpt \
+            -c "$catalog" \
+            -b "$boot_image" -no-emul-boot -boot-load-size 4 -boot-info-table \
+            -eltorito-alt-boot -e '--interval:appended_partition_2:all::' -no-emul-boot \
+            -isohybrid-gpt-basdat \
+            -volid "${volid}" \
+            -o "$output_iso" \
             "$extract_dir"
     fi
     local xorriso_ret=$?
