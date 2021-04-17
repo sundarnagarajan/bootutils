@@ -301,8 +301,6 @@ function update_iso {
     else
         boot_image="/isolinux/isolinux.bin"
         catalog="/isolinux/boot.cat"
-        # MBR image
-        sudo -n dd if="$input_iso" bs=1 count=446 of="$mbr_image" 1>/dev/null 2>&1
         # isohdpfx - first 432 bytes of input_iso
         sudo -n dd if="$input_iso" bs=1 count=432 of="$isohdpfx" 1>/dev/null 2>&1
 
@@ -311,9 +309,8 @@ function update_iso {
         # efi_image="/boot/grub/efi.img"
     fi
 
-    # ALWAYS create ISO with separate EFI partition
-    # EFI (including ia32) works, MBR does not
-    # EFI_ISO=yes
+    # Following (also) works on Focal 20.04 Ubuntu-Mate (non-EFI ISO)
+    # in EFI as well as MBR mode
 
     if [[ "$EFI_ISO" = "yes" ]]; then
         sudo -n xorriso -as mkisofs \
@@ -329,21 +326,8 @@ function update_iso {
             -eltorito-alt-boot -e '--interval:appended_partition_2:all::' -no-emul-boot \
             -volid "${volid}" \
             -o "$output_iso" \
-            "$extract_dir"
+            "$extract_dir" 1>/dev/null 2>&1
     else
-        junk='
-        sudo -n xorriso -as mkisofs \
-            -quiet \
-            -r -J -joliet-long -iso-level 3 -full-iso9660-filenames \
-            -volid "${volid}" \
-            -isohybrid-mbr "$isohdpfx" \
-            -c "$catalog" \
-            -b "$boot_image" -no-emul-boot -boot-load-size 4 -boot-info-table \
-            -eltorito-alt-boot -e "$efi_image" -no-emul-boot \
-            -isohybrid-gpt-basdat \
-            -o "${output_iso}" \
-            "$extract_dir"
-        '
         sudo -n xorriso -as mkisofs \
             -quiet \
             -r -J -joliet-long -l -iso-level 3 -full-iso9660-filenames \
@@ -358,7 +342,7 @@ function update_iso {
             -isohybrid-gpt-basdat \
             -volid "${volid}" \
             -o "$output_iso" \
-            "$extract_dir"
+            "$extract_dir" 1>/dev/null 2>&1
     fi
     local xorriso_ret=$?
     sudo rm -rf "$img_extract_dir"
