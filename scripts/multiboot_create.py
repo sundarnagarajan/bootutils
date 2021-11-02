@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 sys.dont_write_bytecode = True
 import os  # noqa: E402
